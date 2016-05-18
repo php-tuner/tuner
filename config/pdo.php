@@ -1,0 +1,6 @@
+<?php
+//PDO设置
+return array(
+	PDO::ATTR_ERRMODE=>PDO::ERRMODE_EXCEPTION,
+	PDO::ATTR_TIMEOUT=>1,
+);
