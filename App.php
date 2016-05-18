@@ -18,28 +18,28 @@ class App {
     // 执行处理流程
     public static function run(){
         $app = new self();
-		// 如果用cli方式运行(不去改变$_SERVER变量)
-		if(php_sapi_name() === 'cli'){	
-			// use $_SERVER['argv'] instead of $argv(not available)		
-			$req = new RequestCli($_SERVER['argv'][1], getopt('d'));
-		}else{
-	        $req = new Request();
-		}
-		// 使用PATH_INFO路由
-		$req->route_uri = isset($_SERVER['PATH_INFO']) ? $_SERVER['PATH_INFO'] : $req->uri;
-		$req->base_url = "http://{$req->header['Host']}";
-		if($req->route_uri){
-			$base_pos = stripos($_SERVER['REQUEST_URI'], $req->route_uri);
-			$req->base_url .= parse_url(substr($_SERVER['REQUEST_URI'], 0, $base_pos), PHP_URL_PATH);
-		}else{
-			$req->base_url .= $_SERVER['REQUEST_URI'];
-		}
-		$res = new Response(Config::common('charset'));
-		$cfg = new Config();
+        // 如果用cli方式运行(不去改变$_SERVER变量)
+        if(php_sapi_name() === 'cli'){	
+                // use $_SERVER['argv'] instead of $argv(not available)		
+                $req = new RequestCli($_SERVER['argv'][1], getopt('d'));
+        }else{
+            $req = new Request();
+        }
+        // 使用PATH_INFO路由
+        $req->route_uri = isset($_SERVER['PATH_INFO']) ? $_SERVER['PATH_INFO'] : $req->uri;
+        $req->base_url = "http://{$req->header['Host']}";
+        if($req->route_uri){
+                $base_pos = stripos($_SERVER['REQUEST_URI'], $req->route_uri);
+                $req->base_url .= parse_url(substr($_SERVER['REQUEST_URI'], 0, $base_pos), PHP_URL_PATH);
+        }else{
+                $req->base_url .= $_SERVER['REQUEST_URI'];
+        }
+        $res = new Response(Config::common('charset'));
+        $cfg = new Config();
         try{
             // 默认处理器
             Route::addHandler(function($req, $res, $cfg){
-				//开始查找控制器
+                //开始查找控制器
                 $route_path = parse_url($req->route_uri, PHP_URL_PATH);
                 if(!$route_path){
                         $route_path = preg_replace('/\?(.*)/i', '', $req->route_uri);
