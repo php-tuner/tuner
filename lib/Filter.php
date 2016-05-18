@@ -7,14 +7,14 @@
  *
  */
 class Filter {
-	
+
 	//过滤xss
-	public static function xss($html_content){
+	public static function xss($html_content) {
 		static $security = null;
-		if($security == null){
-			$security = new Security();	
+		if ($security == null) {
+			$security = new Security();
 		}
 		return $security->xss_clean($html_content);
 	}
-	
+
 }
