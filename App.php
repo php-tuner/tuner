@@ -8,11 +8,11 @@ class App {
     public function __construct(){
         // 初始化开始
         Log::init(Request::get('debug') == 'dodebug');
-		/*switch(Config::$mode){
-			ini_set('display_errrors', 1);
-			error_reporting(E_ALL);
-		}*/
-		
+        /*switch(Config::$mode){
+            ini_set('display_errrors', 1);
+            error_reporting(E_ALL);
+        }*/
+
     }
 
     // 执行处理流程
@@ -40,80 +40,80 @@ class App {
             // 默认处理器
             Route::addHandler(function($req, $res, $cfg){
 				//开始查找控制器
-				$route_path = parse_url($req->route_uri, PHP_URL_PATH);
-				if(!$route_path){
-					$route_path = preg_replace('/\?(.*)/i', '', $req->route_uri);
-				}
-				$route_file_path = realpath(Helper::dir(APP_ROOT_DIR, $route_path));
-				if(is_file($route_file_path)){
-					$res->file($route_file_path);
-					return true;
-				}
-				$pathinfo = pathinfo($route_path);
-				//$pathinfo = pathinfo(parse_url($req->uri, PHP_URL_PATH));
+                $route_path = parse_url($req->route_uri, PHP_URL_PATH);
+                if(!$route_path){
+                        $route_path = preg_replace('/\?(.*)/i', '', $req->route_uri);
+                }
+                $route_file_path = realpath(Helper::dir(APP_ROOT_DIR, $route_path));
+                if(is_file($route_file_path)){
+                        $res->file($route_file_path);
+                        return true;
+                }
+                $pathinfo = pathinfo($route_path);
+                //$pathinfo = pathinfo(parse_url($req->uri, PHP_URL_PATH));
                 $ext = isset($pathinfo['extension']) ? $pathinfo['extension'] : '';
-				$path = str_replace(array('//'), '', "{$pathinfo['dirname']}/{$pathinfo['filename']}");
+                $path = str_replace(array('//'), '', "{$pathinfo['dirname']}/{$pathinfo['filename']}");
                 $params = explode("/", trim($path, '/'));
 				
-				//附加上最后的文件名
-				//$pathinfo['filename'] && $params[] = $pathinfo['filename'];
-				$len = count($params);
-				//默认倒数第二个是controller, 倒数第一个是action
-				$controller_pos = $len - 2;
-				//从DOCUMENT_ROOT开始找起
-				$controller_dir = APP_CONTROLLER_DIR;
-				//尝试匹配子目录(大于三层目录时)
-				for($i = 0; $i < $len - 2; $i++){
-					$value = $params[$i];
-					$controller_pos = $i;
-					$controller_dir = Helper::dir($controller_dir, $value);
-					if(!file_exists($controller_dir)){
-						$controller_dir = dirname($controller_dir);
-						break;
-					}
-					$controller_pos++;
-				}
-				//子目录
-				$sub_dir = call_user_func_array('Helper::dir', array_slice($params, 0, $controller_pos));
-				//$req->base_url || $req->base_url = implode('/',  array_slice($params, 0, $controller_pos));
-				//Log::debug($route_uri, $req->base_url, $path, $params);
-				
-				$controller = isset($params[$controller_pos]) ? $params[$controller_pos] : Config::common('defaultController');
+                //附加上最后的文件名
+                //$pathinfo['filename'] && $params[] = $pathinfo['filename'];
+                $len = count($params);
+                //默认倒数第二个是controller, 倒数第一个是action
+                $controller_pos = $len - 2;
+                //从DOCUMENT_ROOT开始找起
+                $controller_dir = APP_CONTROLLER_DIR;
+                //尝试匹配子目录(大于三层目录时)
+                for($i = 0; $i < $len - 2; $i++){
+                        $value = $params[$i];
+                        $controller_pos = $i;
+                        $controller_dir = Helper::dir($controller_dir, $value);
+                        if(!file_exists($controller_dir)){
+                                $controller_dir = dirname($controller_dir);
+                                break;
+                        }
+                        $controller_pos++;
+                }
+                //子目录
+                $sub_dir = call_user_func_array('Helper::dir', array_slice($params, 0, $controller_pos));
+                //$req->base_url || $req->base_url = implode('/',  array_slice($params, 0, $controller_pos));
+                //Log::debug($route_uri, $req->base_url, $path, $params);
+                
+                $controller = isset($params[$controller_pos]) ? $params[$controller_pos] : Config::common('defaultController');
                 $class = ucwords($controller)."Controller";
 				
-				//尝试加载控制器文件
-				/*$controller_path = Helper::dir($controller_dir, "{$class}.php");
-				if(!file_exists($controller_path)){
-					//是否需要抛出异常，替代直接返回
-					return $res->notFound();
-				}
-				require_once $controller_path;*/
-				//controller优先查找当前目录
-				spl_autoload_register(_createLoader_(
-					$controller_dir,
-					Helper::dir(APP_ROOT_DIR, $sub_dir, 'model'),
-					Helper::dir(APP_ROOT_DIR, $sub_dir, 'lib')
-				), true, true);
-				
-				if(!class_exists($class)){
-					throw new Exception('not found controller');
-				}
-				//实例化控制器
+                //尝试加载控制器文件
+                /*$controller_path = Helper::dir($controller_dir, "{$class}.php");
+                if(!file_exists($controller_path)){
+                        //是否需要抛出异常，替代直接返回
+                        return $res->notFound();
+                }
+                require_once $controller_path;*/
+                //controller优先查找当前目录
+                spl_autoload_register(_createLoader_(
+                        $controller_dir,
+                        Helper::dir(APP_ROOT_DIR, $sub_dir, 'model'),
+                        Helper::dir(APP_ROOT_DIR, $sub_dir, 'lib')
+                ), true, true);
+                
+                if(!class_exists($class)){
+                        throw new Exception('not found controller');
+                }
+                //实例化控制器
                 $c = new $class($req, $res, $cfg);
-				//寻找控制器方法
+                //寻找控制器方法
                 $action = isset($params[$controller_pos + 1]) && $params[$controller_pos + 1] ? $params[$controller_pos + 1] : Config::common('defaultAction');
-				//分隔符也许可以定制
+                //分隔符也许可以定制
                 $action = str_replace(' ', '', ucwords(str_replace(CAMEL_CLASS_SEP, ' ', $action)));
                 if(!method_exists($c, $action)){
                     $action = 'notFound';
                 }
-				//捕获应用层异常，交给controller 处理
-				try{
-					//action 后的做为参数
-	                call_user_func_array(array($c, $action), array_slice($params, $i+2));
-				}catch(Exception $e){
-					$c->_handleException($e);
-				}	
+                //捕获应用层异常，交给controller 处理
+                try{
+                    //action 后的做为参数
+                    call_user_func_array(array($c, $action), array_slice($params, $i+2));
+                }catch(Exception $e){
+                    $c->_handleException($e);
+                }	
             });
             Route::dispatch($req, $res, $cfg);
         }catch(Exception $e){
