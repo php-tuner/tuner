@@ -21,31 +21,31 @@ class Helper {
 		// 密匙c用于变化生成的密文
 		$keyc = $ckey_length ? ($operation == 'DECODE' ? substr($string, 0, $ckey_length) : substr(md5(microtime()), -$ckey_length)) : '';
 		// 参与运算的密匙
-		$cryptkey = $keya . md5($keya . $keyc);
+		$cryptkey   = $keya . md5($keya . $keyc);
 		$key_length = strlen($cryptkey);
 		// 明文，前10位用来保存时间戳，解密时验证数据有效性，10到26位用来保存$keyb(密匙b)，解密时会通过这个密匙验证数据完整性
 		// 如果是解码的话，会从第$ckey_length位开始，因为密文前$ckey_length位保存 动态密匙，以保证解密正确
-		$string = $operation == 'DECODE' ? base64_decode(substr($string, $ckey_length)) : sprintf('%010d', $expiry ? $expiry + time() : 0) . substr(md5($string . $keyb), 0, 16) . $string;
+		$string        = $operation == 'DECODE' ? base64_decode(substr($string, $ckey_length)) : sprintf('%010d', $expiry ? $expiry + time() : 0) . substr(md5($string . $keyb), 0, 16) . $string;
 		$string_length = strlen($string);
-		$result = '';
-		$box = range(0, 255);
-		$rndkey = array();
+		$result        = '';
+		$box           = range(0, 255);
+		$rndkey        = array();
 		// 产生密匙簿
 		for ($i = 0; $i <= 255; $i++) {
 			$rndkey[$i] = ord($cryptkey[$i % $key_length]);
 		}
 		// 用固定的算法，打乱密匙簿，增加随机性，好像很复杂，实际上对并不会增加密文的强度
 		for ($j = $i = 0; $i < 256; $i++) {
-			$j = ($j + $box[$i] + $rndkey[$i]) % 256;
-			$tmp = $box[$i];
+			$j       = ($j + $box[$i] + $rndkey[$i]) % 256;
+			$tmp     = $box[$i];
 			$box[$i] = $box[$j];
 			$box[$j] = $tmp;
 		}
 		// 核心加解密部分
 		for ($a = $j = $i = 0; $i < $string_length; $i++) {
-			$a = ($a + 1) % 256;
-			$j = ($j + $box[$a]) % 256;
-			$tmp = $box[$a];
+			$a       = ($a + 1) % 256;
+			$j       = ($j + $box[$a]) % 256;
+			$tmp     = $box[$a];
 			$box[$a] = $box[$j];
 			$box[$j] = $tmp;
 			// 从密匙簿得出密匙进行异或，再转成字符
@@ -69,11 +69,11 @@ class Helper {
 	}
 
 	public static function getMemInfo() {
-		$data = explode("\n", file_get_contents("/proc/meminfo"));
+		$data    = explode("\n", file_get_contents("/proc/meminfo"));
 		$meminfo = array();
 		foreach ($data as $line) {
 			list($key, $val) = explode(":", $line);
-			$meminfo[$key] = trim($val);
+			$meminfo[$key]   = trim($val);
 		}
 		return $meminfo;
 	}
@@ -87,8 +87,8 @@ class Helper {
 	// 添加自动包含路径
 	public static function addIncludePath() {
 		$old_path_str = get_include_path();
-		$add_path = func_get_args();
-		$new_path = array_merge(explode(PATH_SEPARATOR, $old_path_str), $add_path);
+		$add_path     = func_get_args();
+		$new_path     = array_merge(explode(PATH_SEPARATOR, $old_path_str), $add_path);
 		$new_path_str = implode(PATH_SEPARATOR, array_unique($new_path));
 		return set_include_path($new_path_str);
 	}
@@ -96,7 +96,7 @@ class Helper {
 	//检查IP是否是内网地址
 	public static function isInternalIP($ip_str) {
 		$ip_str = trim($ip_str);
-		$ip = explode('.', $ip_str);
+		$ip     = explode('.', $ip_str);
 		return in_array("{$ip[0]}", array('10', '172', '127'));
 	}
 

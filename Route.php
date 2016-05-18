@@ -33,7 +33,7 @@ class Route {
 			foreach ($routes as $pattern => $action) {
 				if (preg_match($pattern, $subject, $match)) {
 					if (!$action) {
-						$class = ucwords($match['controller']) . "Controller";
+						$class  = ucwords($match['controller']) . "Controller";
 						$action = array($class, $match['action']);
 					}
 					if (is_array($action)) {

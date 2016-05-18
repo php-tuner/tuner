@@ -32,7 +32,7 @@ class Http {
 
 	// 生成规范化的key: Content-Type
 	public static function canonicalHeaderKey($key) {
-		$len = strlen($key);
+		$len    = strlen($key);
 		$uppper = true;
 		for ($i = 0; $i < $len; $i++) {
 			if ($uppper) {
@@ -46,7 +46,7 @@ class Http {
 	// 解析header头
 	public static function parseHeaders($raw_headers) {
 		$headers = array();
-		$key = '';
+		$key     = '';
 		foreach (explode("\n", $raw_headers) as $i => $h) {
 			$h = explode(':', $h, 2);
 			if (isset($h[1])) {
@@ -91,7 +91,7 @@ class Http {
 		if (function_exists('exec')) {
 			if ($params) {
 				$params_string = http_build_query($params, '', '&');
-				$params = " -d '$params_string' ";
+				$params        = " -d '$params_string' ";
 			} else {
 				$params = '';
 			}
@@ -108,7 +108,7 @@ class Http {
 	 * @author Heng Min Zhan
 	 */
 	public static function socketRequest($url, $params = array(), $headers = array(), $wait_result = true, $connect_timeout = 1, $read_timeout = 3, $max_redirect = 5) {
-		$crlf = "\r\n";
+		$crlf   = "\r\n";
 		$method = 'GET';
 		if ($params) {
 			$method = 'POST';
@@ -120,7 +120,7 @@ class Http {
 		if (!isset($headers['User-Agent'])) {
 			$headers['User-Agent'] = self::$UA;
 		}
-		$out = array();
+		$out   = array();
 		$out[] = "$method {$parts['path']}?{$parts['query']} HTTP/1.1";
 		$out[] = "Host: {$parts['host']}";
 		$out[] = "Connection: Close";
@@ -132,7 +132,7 @@ class Http {
 		if ($method == 'POST') {
 			if (is_array($params)) {
 				$headers['Content-Type'] = "application/x-www-form-urlencoded";
-				$post_string = http_build_query($params, '', '&');
+				$post_string             = http_build_query($params, '', '&');
 			} else {
 				$post_string = trim($params);
 			}
@@ -157,7 +157,7 @@ class Http {
 		if (!$fp) {
 			return new HttpResponse('', '', '', new Exception("url: $url, error: $errstr", $errno));
 		}
-		$string = implode($crlf, $out);
+		$string  = implode($crlf, $out);
 		$str_len = strlen($string);
 		for ($written = 0, $fwrite = 0; $written < $str_len; $written += $fwrite) {
 			$fwrite = fwrite($fp, substr($string, $written));
@@ -171,14 +171,14 @@ class Http {
 		}
 		//fwrite($fp, implode($crlf, $out));
 		//repsonse header
-		$headers = array();
-		$body = '';
+		$headers     = array();
+		$body        = '';
 		$http_status = array();
 		if ($wait_result) {
 			stream_set_timeout($fp, $read_timeout);
 			//read and parse header
 			list($http_status['version'], $http_status['code'], $http_status['desc']) = explode(' ', trim(fgets($fp, 256)));
-			$header_lines = '';
+			$header_lines                                                             = '';
 			while (!feof($fp)) {
 				$line = fgets($fp, 256);
 				if (empty(trim($line))) {
@@ -236,8 +236,8 @@ class Http {
 	public static function curlRequest($url, $params = array(), $headers = array(), $wait_result = true, $connect_timeout = 1, $read_timeout = 3, $max_redirect = 5) {
 		$re = self::multiCurl(array(
 			array(
-				'url' => $url,
-				'params' => $params,
+				'url'     => $url,
+				'params'  => $params,
 				'headers' => $headers,
 			),
 		), true, $connect_timeout, $read_timeout, $max_redirect);
@@ -285,7 +285,7 @@ class Http {
 		$curl_list = array();
 		foreach ($request_list as $req) {
 			list($url, $params, $headers) = array_values($req);
-			$ch = self::getCurlInstance($url, $connect_timeout, $read_timeout, $max_redirect);
+			$ch                           = self::getCurlInstance($url, $connect_timeout, $read_timeout, $max_redirect);
 			//disable expect header, some server not surpport it
 			$headers[] = 'Expect:';
 			curl_setopt($ch, CURLOPT_HTTPHEADER, self::buildHeader($headers));
@@ -326,21 +326,21 @@ class Http {
 		if ($callback && $status == CURLM_OK) {
 			while ($done = curl_multi_info_read($chs)) {
 				//http://php.net/curl_getinfo
-				$info = curl_getinfo($done["handle"]);
+				$info  = curl_getinfo($done["handle"]);
 				$error = curl_error($done["handle"]);
 				//wrong may be still have body data
 				$result = curl_multi_getcontent($done["handle"]);
-				$body = $info['header_size'] && $result ? substr($result, $info['header_size']) : null;
+				$body   = $info['header_size'] && $result ? substr($result, $info['header_size']) : null;
 				if ($error || !in_array($info['http_code'], array(200))) {
 					$rtn = new HttpResponse('', '', $body, new Exception("url:{$info['url']}, error:$error, info:" . print_r($info, true)));
 					//throw new Exception($error);
 				} else {
 					$header_lines = substr($result, 0, $info['header_size']);
-					$http_status = array();
-					$headers = self::parseHeaders($header_lines);
+					$http_status  = array();
+					$headers      = self::parseHeaders($header_lines);
 					//it must have set key 0
 					list($http_status['version'], $http_status['code'], $http_status['desc']) = explode(' ', $headers[0]);
-					$rtn = new HttpResponse($http_status, $headers, $body); //compact('info', 'error', 'result');
+					$rtn                                                                      = new HttpResponse($http_status, $headers, $body); //compact('info', 'error', 'result');
 				}
 				if (is_callable($callback)) {
 					$callback($rtn);
@@ -363,14 +363,14 @@ class HttpResponse {
 
 	public $status = array();
 	public $header = array();
-	public $body = '';
-	public $error = null;
+	public $body   = '';
+	public $error  = null;
 
 	public function __construct($status, $header, $body, $error = null) {
 		$this->status = $status;
 		$this->header = $header;
-		$this->body = $body;
-		$this->error = $error;
+		$this->body   = $body;
+		$this->error  = $error;
 		if ($error != null) {
 			Log::file($this->error(), 'http_request');
 		}

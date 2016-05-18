@@ -1,7 +1,7 @@
 <?php
 class Model {
 
-	protected $db = null;
+	protected $db    = null;
 	protected $table = '';
 
 	public function __construct() {
@@ -19,7 +19,7 @@ class Model {
 	}
 
 	public function queryCacheRow($sql, $cache_time = 300) {
-		$cache_key = md5("queryCacheRow_{$sql}");
+		$cache_key  = md5("queryCacheRow_{$sql}");
 		$cache_data = Cache::getData($cache_key);
 		if ($cache_data) {
 			return $cache_data;
@@ -30,7 +30,7 @@ class Model {
 	}
 
 	public function queryCacheRows($sql, $cache_time = 300) {
-		$cache_key = md5("queryCacheRow_{$sql}");
+		$cache_key  = md5("queryCacheRow_{$sql}");
 		$cache_data = Cache::getData($cache_key);
 		if ($cache_data) {
 			return $cache_data;
@@ -52,9 +52,9 @@ class Model {
 
 	private function buildSql($where_array, $table = '') {
 		$table || $table = $this->table;
-		$table = $this->escape($table);
-		$where_str = $this->getWhereStr($where_array);
-		$sql = "SELECT * FROM `$table` $where_str";
+		$table           = $this->escape($table);
+		$where_str       = $this->getWhereStr($where_array);
+		$sql             = "SELECT * FROM `$table` $where_str";
 		return $sql;
 	}
 
@@ -75,7 +75,7 @@ class Model {
 		if (function_exists('mysql_escape_string')) {
 			return mysql_escape_string($v);
 		}
-		$search = array("\\", "\x00", "\n", "\r", "'", '"', "\x1a");
+		$search  = array("\\", "\x00", "\n", "\r", "'", '"', "\x1a");
 		$replace = array("\\\\", "\\0", "\\n", "\\r", "\'", '\"', "\\Z");
 		return str_replace($search, $replace, $v);
 	}
@@ -91,25 +91,25 @@ class Model {
 				$in_value = array();
 				foreach ($value as $k => $v) {
 					if (is_int($k)) {
-						$v = $this->escape($v);
+						$v          = $this->escape($v);
 						$in_value[] = $v;
 					} else { //key作为操作符使用
 						$k = $this->escape($k);
 						if (is_array($v)) {
-							$v = implode("','", array_map(array($this, 'escape'), $v));
+							$v       = implode("','", array_map(array($this, 'escape'), $v));
 							$where[] = " `$key` $k ('$v') ";
 						} else {
-							$v = $this->escape($v);
+							$v       = $this->escape($v);
 							$where[] = " `$key` $k '$v' ";
 						}
 					}
 				}
 				if ($in_value) {
 					$in_value = implode("','", $in_value);
-					$where[] = " `$key` in( '$in_value' ) ";
+					$where[]  = " `$key` in( '$in_value' ) ";
 				}
 			} else {
-				$value = $this->escape($value);
+				$value   = $this->escape($value);
 				$where[] = " `$key` = '$value' ";
 			}
 		}
@@ -123,8 +123,8 @@ class Model {
 		}
 		$set_array = array();
 		foreach ($data_array as $key => $value) {
-			$value = $this->escape($value);
-			$key = $this->escape($key);
+			$value       = $this->escape($value);
+			$key         = $this->escape($key);
 			$set_array[] = " `$key` = '{$value}' ";
 		}
 		return ' SET ' . implode(',', $set_array);
@@ -133,52 +133,52 @@ class Model {
 	// 插入记录
 	public function insertOne($sets, $table = '') {
 		$table || $table = $this->table;
-		$table = $this->escape($table);
-		$set_str = $this->getSetStr($sets);
-		$sql = "INSERT INTO `$table` $set_str";
-		$re = $this->query($sql);
+		$table           = $this->escape($table);
+		$set_str         = $this->getSetStr($sets);
+		$sql             = "INSERT INTO `$table` $set_str";
+		$re              = $this->query($sql);
 		return $re;
 	}
 
 	// 更新单条记录
 	public function updateOne($sets, $wheres, $table = '') {
 		$table || $table = $this->table;
-		$table = $this->escape($table);
-		$set_str = $this->getSetStr($sets);
-		$where_str = $this->getWhereStr($wheres);
-		$sql = "UPDATE `$table` $set_str $where_str LIMIT 1";
-		$re = $this->query($sql);
+		$table           = $this->escape($table);
+		$set_str         = $this->getSetStr($sets);
+		$where_str       = $this->getWhereStr($wheres);
+		$sql             = "UPDATE `$table` $set_str $where_str LIMIT 1";
+		$re              = $this->query($sql);
 		return $re;
 	}
 
 	// 更新多条记录
 	public function updateBatch($sets, $wheres, $table = '') {
 		$table || $table = $this->table;
-		$table = $this->escape($table);
-		$set_str = $this->getSetStr($sets);
-		$where_str = $this->getWhereStr($wheres);
-		$sql = "UPDATE `$table` $set_str $where_str";
-		$re = $this->query($sql);
+		$table           = $this->escape($table);
+		$set_str         = $this->getSetStr($sets);
+		$where_str       = $this->getWhereStr($wheres);
+		$sql             = "UPDATE `$table` $set_str $where_str";
+		$re              = $this->query($sql);
 		return $re;
 	}
 
 	// 删除多条记录
 	public function deleteBatch($wheres, $table = '') {
 		$table || $table = $this->table;
-		$table = $this->escape($table);
-		$where_str = $this->getWhereStr($wheres);
-		$sql = "DELETE FROM  `$table` $where_str";
-		$re = $this->query($sql);
+		$table           = $this->escape($table);
+		$where_str       = $this->getWhereStr($wheres);
+		$sql             = "DELETE FROM  `$table` $where_str";
+		$re              = $this->query($sql);
 		return $re;
 	}
 
 	// 删除单条记录
 	public function deleteOne($wheres, $table = '') {
 		$table || $table = $this->table;
-		$table = $this->escape($table);
-		$where_str = $this->getWhereStr($wheres);
-		$sql = "DELETE FROM `$table` $where_str LIMIT 1";
-		$re = $this->query($sql);
+		$table           = $this->escape($table);
+		$where_str       = $this->getWhereStr($wheres);
+		$sql             = "DELETE FROM `$table` $where_str LIMIT 1";
+		$re              = $this->query($sql);
 		return $re;
 	}
 

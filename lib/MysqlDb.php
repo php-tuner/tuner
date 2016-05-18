@@ -2,11 +2,11 @@
 
 class MysqlDb {
 
-	private $config = null;
+	private $config     = null;
 	private $default_db = null;
 
 	private $master_link = null;
-	private $slave_link = null;
+	private $slave_link  = null;
 
 	private static $links = array();
 
@@ -16,7 +16,7 @@ class MysqlDb {
 	private $in_transaction = false;
 
 	public function __construct($config, $dbname = '') {
-		$this->config = $config;
+		$this->config     = $config;
 		$this->default_db = $dbname;
 	}
 
@@ -63,7 +63,7 @@ class MysqlDb {
 		if (function_exists('mysql_escape_string')) {
 			return mysql_escape_string($v);
 		}
-		$search = array("\\", "\x00", "\n", "\r", "'", '"', "\x1a");
+		$search  = array("\\", "\x00", "\n", "\r", "'", '"', "\x1a");
 		$replace = array("\\\\", "\\0", "\\n", "\\r", "\'", '\"', "\\Z");
 		return str_replace($search, $replace, $v);
 	}
@@ -78,14 +78,14 @@ class MysqlDb {
 			throw new Exception("not found $type config");
 		}
 		self::$links[$type] = null; //destory it
-		$cfg = $this->config[$type];
-		$host = $cfg['host'];
-		$user = $cfg['user'];
-		$port = isset($cfg['port']) ? $cfg['port'] : 3306;
-		$password = $cfg['password'];
-		$db_name = $this->default_db ? $this->default_db : $cfg['dbname'];
-		$charset = isset($cfg['charset']) ? $cfg['charset'] : 'utf8';
-		$dsn = "mysql:dbname={$db_name};host={$host};port={$port};charset={$charset}";
+		$cfg                = $this->config[$type];
+		$host               = $cfg['host'];
+		$user               = $cfg['user'];
+		$port               = isset($cfg['port']) ? $cfg['port'] : 3306;
+		$password           = $cfg['password'];
+		$db_name            = $this->default_db ? $this->default_db : $cfg['dbname'];
+		$charset            = isset($cfg['charset']) ? $cfg['charset'] : 'utf8';
+		$dsn                = "mysql:dbname={$db_name};host={$host};port={$port};charset={$charset}";
 		try {
 			$link = new PDO($dsn, $user, $password, Config::pdo());
 		} catch (Exception $e) {
@@ -110,7 +110,7 @@ class MysqlDb {
 
 	//执行SQL
 	public function query($sql, $force_new = false) {
-		$sql = trim($sql);
+		$sql       = trim($sql);
 		$is_select = preg_match('/^SELECT\s+/i', $sql);
 		//非事务状态下自动切换主从
 		if (!$this->in_transaction) {
@@ -125,7 +125,7 @@ class MysqlDb {
 		Log::debug($sql);
 		$result = $link->query($sql);
 		if (!$result) {
-			$info = $link->errorInfo();
+			$info    = $link->errorInfo();
 			$err_msg = "{$info[0]}:{$info[1]}:{$info[2]}\t sql:$sql";
 			Log::debug($err_msg);
 			//记录错误日志

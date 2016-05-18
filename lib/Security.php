@@ -19,15 +19,15 @@ class Security {
 	 */
 	protected $_never_allowed_str = array(
 		'document.cookie' => '[removed]',
-		'document.write' => '[removed]',
-		'.parentNode' => '[removed]',
-		'.innerHTML' => '[removed]',
+		'document.write'  => '[removed]',
+		'.parentNode'     => '[removed]',
+		'.innerHTML'      => '[removed]',
 		'window.location' => '[removed]',
-		'-moz-binding' => '[removed]',
-		'<!--' => '&lt;!--',
-		'-->' => '--&gt;',
-		'<![CDATA[' => '&lt;![CDATA[',
-		'<comment>' => '&lt;comment&gt;',
+		'-moz-binding'    => '[removed]',
+		'<!--'            => '&lt;!--',
+		'-->'             => '--&gt;',
+		'<![CDATA['       => '&lt;![CDATA[',
+		'<comment>'       => '&lt;comment&gt;',
 	);
 
 	/* never allowed, regex replacement */
@@ -249,7 +249,7 @@ class Security {
 			 * Becomes: &lt;blink&gt;
 		*/
 		$naughty = 'alert|applet|audio|basefont|base|behavior|bgsound|blink|body|embed|expression|form|frameset|frame|head|html|ilayer|iframe|input|isindex|layer|link|meta|object|plaintext|style|script|textarea|title|video|xml|xss';
-		$str = preg_replace_callback('#<(/*\s*)(' . $naughty . ')([^><]*)([><]*)#is', array($this, '_sanitize_naughty_html'), $str);
+		$str     = preg_replace_callback('#<(/*\s*)(' . $naughty . ')([^><]*)([><]*)#is', array($this, '_sanitize_naughty_html'), $str);
 
 		/*
 			 * Sanitize naughty scripting elements
@@ -428,7 +428,7 @@ class Security {
 		}
 
 		do {
-			$count = 0;
+			$count   = 0;
 			$attribs = array();
 
 			// find occurrences of illegal attribute strings without quotes

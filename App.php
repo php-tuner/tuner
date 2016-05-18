@@ -27,7 +27,7 @@ class App {
 		}
 		// 使用PATH_INFO路由
 		$req->route_uri = isset($_SERVER['PATH_INFO']) ? $_SERVER['PATH_INFO'] : $req->uri;
-		$req->base_url = "http://{$req->header['Host']}";
+		$req->base_url  = "http://{$req->header['Host']}";
 		if ($req->route_uri) {
 			$base_pos = stripos($_SERVER['REQUEST_URI'], $req->route_uri);
 			$req->base_url .= parse_url(substr($_SERVER['REQUEST_URI'], 0, $base_pos), PHP_URL_PATH);
@@ -51,8 +51,8 @@ class App {
 				}
 				$pathinfo = pathinfo($route_path);
 				//$pathinfo = pathinfo(parse_url($req->uri, PHP_URL_PATH));
-				$ext = isset($pathinfo['extension']) ? $pathinfo['extension'] : '';
-				$path = str_replace(array('//'), '', "{$pathinfo['dirname']}/{$pathinfo['filename']}");
+				$ext    = isset($pathinfo['extension']) ? $pathinfo['extension'] : '';
+				$path   = str_replace(array('//'), '', "{$pathinfo['dirname']}/{$pathinfo['filename']}");
 				$params = explode("/", trim($path, '/'));
 
 				//附加上最后的文件名
@@ -64,7 +64,7 @@ class App {
 				$controller_dir = APP_CONTROLLER_DIR;
 				//尝试匹配子目录(大于三层目录时)
 				for ($i = 0; $i < $len - 2; $i++) {
-					$value = $params[$i];
+					$value          = $params[$i];
 					$controller_pos = $i;
 					$controller_dir = Helper::dir($controller_dir, $value);
 					if (!file_exists($controller_dir)) {
@@ -79,7 +79,7 @@ class App {
 				//Log::debug($route_uri, $req->base_url, $path, $params);
 
 				$controller = isset($params[$controller_pos]) ? $params[$controller_pos] : Config::common('defaultController');
-				$class = ucwords($controller) . "Controller";
+				$class      = ucwords($controller) . "Controller";
 
 				//尝试加载控制器文件
 				/*

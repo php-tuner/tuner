@@ -25,9 +25,9 @@ class Tpl {
 		Twig_Autoloader::register();
 		$loader = new Twig_Loader_Filesystem($template_config['path']);
 		return new Twig_Environment($loader, array(
-			'cache' => $template_config['cache'],
+			'cache'       => $template_config['cache'],
 			'auto_reload' => true,
-			'charset' => $charset,
+			'charset'     => $charset,
 			//'debug' => true,
 		));
 	}

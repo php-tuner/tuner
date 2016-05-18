@@ -23,7 +23,7 @@ class Controller {
 		if ($controller == null) {
 			$controller = $this;
 		} else {
-			$pathinfo = pathinfo($controller);
+			$pathinfo   = pathinfo($controller);
 			$controller = new $pathinfo['basename']();
 		}
 		//打开输出缓冲
@@ -40,9 +40,9 @@ class Controller {
 		Twig_Autoloader::register();
 		$loader = new Twig_Loader_Filesystem($template_config['path']);
 		return new Twig_Environment($loader, array(
-			'cache' => $template_config['cache'],
+			'cache'       => $template_config['cache'],
 			'auto_reload' => true,
-			'charset' => $charset,
+			'charset'     => $charset,
 			//'debug' => true,
 		));
 	}
@@ -70,11 +70,11 @@ class Controller {
 		if (preg_match('#^https?://#', $uri)) {
 			$url = $uri; //本身是绝对地址
 		} else {
-			$host = $this->req->header['Host'];
+			$host     = $this->req->header['Host'];
 			$base_url = $this->req->base_url ? $this->req->base_url : Config::site('base_url');
 			$base_url = rtrim($base_url, '/');
-			$uri = ltrim($uri, '/');
-			$url = "{$base_url}/$uri";
+			$uri      = ltrim($uri, '/');
+			$url      = "{$base_url}/$uri";
 		}
 		if (!$params) {
 			return $url;
@@ -94,7 +94,7 @@ class Controller {
 	protected function reponsive($template_file, $data = array(), $force_mobile = false) {
 		$detect = new MobileDetect();
 		if ($detect->isMobile() || $force_mobile) {
-			$pinfo = pathinfo($template_file);
+			$pinfo         = pathinfo($template_file);
 			$template_file = "{$pinfo['dirname']}/{$pinfo['filename']}_mobile.{$pinfo['extension']}";
 		}
 		$this->display($template_file, $data);
@@ -121,8 +121,8 @@ class Controller {
 	protected function success($data = array(), $msg = '操作成功', $halt = true) {
 		$re = array(
 			'error_code' => 0,
-			'tip_msg' => $msg,
-			'data' => $data,
+			'tip_msg'    => $msg,
+			'data'       => $data,
 		);
 		$this->output($re);
 		$halt && exit();
@@ -131,13 +131,13 @@ class Controller {
 	//异常处理(Todo: 支持backtrace ?)
 	public function _handleException($e) {
 		$format = $this->req->format;
-		$code = $e->getCode() ? $e->getCode() : 1;
-		$msg = $e->getMessage();
+		$code   = $e->getCode() ? $e->getCode() : 1;
+		$msg    = $e->getMessage();
 		switch ($format) {
 		case 'json':
 		case 'xml':
 			$data = array(
-				'error_msg' => $msg,
+				'error_msg'  => $msg,
 				'error_code' => $code,
 			);
 			break;
@@ -147,9 +147,9 @@ class Controller {
 				$back_url = $_SERVER['HTTP_REFERER'];
 			}
 			$data = $this->render('message/error.html', array(
-				'error_msg' => $msg,
+				'error_msg'  => $msg,
 				'error_code' => $code,
-				'back_url' => $back_url,
+				'back_url'   => $back_url,
 			));
 		}
 		//avoid call child method implemention

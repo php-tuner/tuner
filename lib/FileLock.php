@@ -9,7 +9,7 @@
 class FileLock {
 
 	private $all_lock_handles = array();
-	private $lock_dir = "/tmp";
+	private $lock_dir         = "/tmp";
 
 	public function __construct($lock_dir = 0) {
 		if ($lock_dir) {
@@ -36,8 +36,8 @@ class FileLock {
 	 */
 	public function begin($name, $block = false) {
 		$lock_file = $this->getLockFile($name);
-		$fp = fopen($lock_file, "w+");
-		$opt = LOCK_EX;
+		$fp        = fopen($lock_file, "w+");
+		$opt       = LOCK_EX;
 		if (!$block) {
 			$opt |= LOCK_NB;
 		}

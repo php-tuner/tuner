@@ -77,7 +77,7 @@ function _createLoader_($controller_dir, $model_dir, $final_dir) {
 
 if (!function_exists('mysql_escape_string')) {
 	function mysql_escape_string($v) {
-		$search = array("\\", "\x00", "\n", "\r", "'", '"', "\x1a");
+		$search  = array("\\", "\x00", "\n", "\r", "'", '"', "\x1a");
 		$replace = array("\\\\", "\\0", "\\n", "\\r", "\'", '\"', "\\Z");
 		return str_replace($search, $replace, $v);
 	}

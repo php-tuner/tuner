@@ -3,17 +3,17 @@
 
 class RequestCli extends Request {
 
-	private $fake_get = array();
+	private $fake_get  = array();
 	private $fake_post = array();
 
 	//构造
 	public function __construct($uri, $post_data) {
 		$this->init(); // 初始化
 		$this->method = empty($post_data) ? 'GET' : 'POST';
-		$this->time = time();
-		$this->uri = $uri;
+		$this->time   = time();
+		$this->uri    = $uri;
 		$this->format = 'text';
-		$uri_info = parse_url($uri);
+		$uri_info     = parse_url($uri);
 		isset($uri_info['query']) && parse_str($uri_info['query'], $this->fake_get);
 		$post_data && parse_str($post_data, $this->fake_post);
 	}

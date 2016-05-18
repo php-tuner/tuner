@@ -1,7 +1,7 @@
 <?php
 
 class Log {
-	private static $data = array();
+	private static $data     = array();
 	private static $is_debug = false;
 
 	public static function init($debug = false) {
@@ -70,7 +70,7 @@ class Log {
 		}
 		$filename .= ".txt";
 		$filepath = Helper::dir($dir, $filename);
-		$str = trim($str);
+		$str      = trim($str);
 		/*if (empty($str))
 			{
 				return false;

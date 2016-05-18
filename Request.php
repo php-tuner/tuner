@@ -24,13 +24,13 @@ class Request {
 
 	// 构造方法
 	public function __construct() {
-		$this->header = $this->getHeader();
-		$this->method = trim($_SERVER['REQUEST_METHOD']);
-		$this->time = intval($_SERVER['REQUEST_TIME']);
-		$this->uri = trim($_SERVER['REQUEST_URI']);
-		$this->format = $this->getFormat();
+		$this->header    = $this->getHeader();
+		$this->method    = trim($_SERVER['REQUEST_METHOD']);
+		$this->time      = intval($_SERVER['REQUEST_TIME']);
+		$this->uri       = trim($_SERVER['REQUEST_URI']);
+		$this->format    = $this->getFormat();
 		$this->client_ip = static::getClientIp();
-		$this->is_ajax = static::isAjax();
+		$this->is_ajax   = static::isAjax();
 		//如果没有content_type, 尝试自己解析post请求
 		//https://github.com/gfdev/javascript-jquery-transport-xdr
 		/*if($this->method == 'POST' && !$_SERVER['CONTENT_TYPE']){
@@ -72,10 +72,10 @@ class Request {
 	public static function buildMultipartFormData($assoc, $files, &$boundary = '') {
 		// invalid characters for "name" and "filename"
 		static $disallow = array("\0", "\"", "\r", "\n");
-		$body = array();
+		$body            = array();
 		// build normal parameters
 		foreach ($assoc as $k => $v) {
-			$k = str_replace($disallow, "_", $k);
+			$k      = str_replace($disallow, "_", $k);
 			$body[] = implode("\r\n", array(
 				"Content-Disposition: form-data; name=\"{$k}\"",
 				"",
@@ -87,9 +87,9 @@ class Request {
 			if (is_array($v)) {
 				$filepath = $v['tmp_name'];
 				$filename = $v['name'];
-				$type = $v['type'];
+				$type     = $v['type'];
 			} else {
-				$type = 'application/octet-stream';
+				$type     = 'application/octet-stream';
 				$filepath = $filepath = $v;
 			}
 			switch (true) {
@@ -98,11 +98,11 @@ class Request {
 			case !is_readable($filepath):
 				continue; // or return false, throw new InvalidArgumentException
 			}
-			$data = file_get_contents($filepath);
+			$data     = file_get_contents($filepath);
 			$filename = call_user_func("end", explode(DIRECTORY_SEPARATOR, $filename));
-			$k = str_replace($disallow, "_", $k);
+			$k        = str_replace($disallow, "_", $k);
 			$filename = str_replace($disallow, "_", $filename);
-			$body[] = implode("\r\n", array(
+			$body[]   = implode("\r\n", array(
 				"Content-Disposition: form-data; name=\"{$k}\"; filename=\"{$filename}\"",
 				"Content-Type: $type",
 				"",
@@ -171,7 +171,7 @@ class Request {
 
 	// 获取所有的HEADER
 	public static function getHeader($key = '') {
-		$headers = array();
+		$headers    = array();
 		$extra_keys = array(
 			'CONTENT_TYPE',
 			'CONTENT_LENGTH',
@@ -194,7 +194,7 @@ class Request {
 		//force_format
 		$format = $this->get('_format');
 		if (!$format) {
-			$path = parse_url($this->uri, PHP_URL_PATH);
+			$path   = parse_url($this->uri, PHP_URL_PATH);
 			$format = pathinfo($path, PATHINFO_EXTENSION);
 		}
 		return $format ? strtolower($format) : 'html';

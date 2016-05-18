@@ -9,7 +9,7 @@ class Cache {
 	//获取默认的缓存
 	public static function getDefault() {
 		$cache_handler = ucwords(strtolower(Config::common('cache')));
-		$servers = Config::memcache('servers');
+		$servers       = Config::memcache('servers');
 		switch (true) {
 		case ($cache_handler == 'Auto' && class_exists('Memcached')) || $cache_handler == 'Memcached':
 			return self::memcached($servers['cache']);
@@ -27,7 +27,7 @@ class Cache {
 
 	//缓存函数执行结果
 	public static function call($callback, $params, $cache_time = 300) {
-		$cache_key = md5(serialize($callback) . serialize($params));
+		$cache_key  = md5(serialize($callback) . serialize($params));
 		$cache_data = self::getData($cache_key);
 		if ($cache_data) {
 			return $cache_data;
@@ -39,12 +39,12 @@ class Cache {
 
 	//设置缓存数据(防雪崩)
 	public static function setData($key, $value, $expire_time = 300) {
-		$now_time = time();
+		$now_time         = time();
 		$fake_expire_time = $now_time + $expire_time * 2;
-		$meta_key = self::getMetaKey($key);
-		$meta_data = array(
+		$meta_key         = self::getMetaKey($key);
+		$meta_data        = array(
 			'real_expire_time' => $now_time + $expire_time,
-			'status' => 'cache',
+			'status'           => 'cache',
 		);
 		//echo $fake_expire_time;
 		self::set($meta_key, $meta_data, $fake_expire_time);
@@ -53,9 +53,9 @@ class Cache {
 
 	//缓存数据(防雪崩)
 	public static function getData($key) {
-		$meta_key = self::getMetaKey($key);
+		$meta_key  = self::getMetaKey($key);
 		$meta_data = self::get($meta_key);
-		$now_time = time();
+		$now_time  = time();
 		//需要加锁
 		if (is_array($meta_data) && $meta_data['real_expire_time'] < $now_time && $meta_data['status'] == 'cache') {
 			$meta_data['status'] = 'fresh';
@@ -107,7 +107,7 @@ class Cache {
 		$key = md5(serialize($servers));
 		if (!isset($mcd_list[$key])) {
 			$mcd = new Memcached();
-			$re = $mcd->addServers($servers);
+			$re  = $mcd->addServers($servers);
 			isset($config['options']) && $mcd->setOptions($config['options']);
 			$mcd_list[$key] = $mcd;
 		}
