@@ -60,9 +60,6 @@ class MysqlDb {
 
 	// 转义字符
 	public function escape($v) {
-		if (function_exists('mysql_escape_string')) {
-			return mysql_escape_string($v);
-		}
 		$search  = array("\\", "\x00", "\n", "\r", "'", '"', "\x1a");
 		$replace = array("\\\\", "\\0", "\\n", "\\r", "\'", '\"', "\\Z");
 		return str_replace($search, $replace, $v);
@@ -111,6 +108,7 @@ class MysqlDb {
 	//执行SQL
 	public function query($sql, $force_new = false) {
 		$sql       = trim($sql);
+                //preg_match('/^\s*"?(SET|INSERT|UPDATE|DELETE|REPLACE|CREATE|DROP|TRUNCATE|LOAD|COPY|ALTER|RENAME|GRANT|REVOKE|LOCK|UNLOCK|REINDEX)\s/i', $sql);
 		$is_select = preg_match('/^SELECT\s+/i', $sql);
 		//非事务状态下自动切换主从
 		if (!$this->in_transaction) {

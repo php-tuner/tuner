@@ -32,18 +32,30 @@ class Route {
 			}
 			foreach ($routes as $pattern => $action) {
 				if (preg_match($pattern, $subject, $match)) {
-					if (!$action) {
+                                        if(!$action && isset($match['controller'])){
 						$class  = ucwords($match['controller']) . "Controller";
-						$action = array($class, $match['action']);
-					}
+                                                $action = array($class);
+                                        }
 					if (is_array($action)) {
 						list($class, $method) = $action;
+                                                if(!$method && isset($match['action'])){
+                                                      $method =  $match['action']; 
+                                                }
 						if (self::isController($class)) {
-							$action = array(new $class($req, $res, $cfg), $method);
+                                                        $obj = new $class($req, $res, $cfg);
+                                                        if(!method_exists($obj, $method)){
+                                                                throw new Exception("not found(action: $method)");
+                                                        }
+							$action = array($obj, $method);
 						}
-					}
-					if (is_callable($action)) {
-						return call_user_func_array($action, array('params' => $match));
+        					if (is_callable($action)) {
+        						return call_user_func_array($action, array('params' => $match));
+        					}
+                                        }elseif(is_string($action) && $action){
+					       foreach($match as $k => $v){
+                                                       $action = str_replace('$'.$k, $v, $action);
+                                               } 
+                                               $req->route_uri = $action;
 					}
 				}
 			}

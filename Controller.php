@@ -9,6 +9,7 @@ class Controller {
 	protected $req = null;
 	protected $res = null;
 	protected $cfg = array();
+        public $default_action = 'index';
 	//模版数据
 
 	public function __construct($req, $res, $cfg) {
@@ -16,7 +17,12 @@ class Controller {
 		$this->res = $res; //响应
 		$this->cfg = $cfg; //配置
 	}
-
+        
+        //默认首页
+        public function index(){
+                $this->res->html("<h1>default action.</h1>");
+        }
+        
 	//call other controller action
 	public function callAction($action, $controller = null) {
 
@@ -53,7 +59,11 @@ class Controller {
 		if (!preg_match('/^https?:\/\//', $url)) {
 			$url = $this->buildUrl($url);
 		}
-		$this->res->redirect($url, $code);
+		$this->res->redirect($url, $code, false);
+                //显示一段 html
+                $this->display('redirect.html', array(
+                        'url' => $url,
+                ));
 	}
 
 	//直接输出
@@ -79,8 +89,14 @@ class Controller {
 		if (!$params) {
 			return $url;
 		}
+                if(stripos($url, '?') === false){
+                        $url .= "?";
+                }
+                if(substr($url, -1) != '?'){
+                        $url .= "&";
+                }
 		$query_string = http_build_query($params, '', '&');
-		return "$url?$query_string";
+		return $url.$query_string;
 	}
 
 	//渲染数据
@@ -90,18 +106,37 @@ class Controller {
 		), $data), $this->res->charset);
 	}
 
-	//响应式渲染模版
-	protected function reponsive($template_file, $data = array(), $force_mobile = false) {
-		$detect = new MobileDetect();
-		if ($detect->isMobile() || $force_mobile) {
+	//响应式渲染模版(废弃)
+	protected function reponsive($template_file, $data = array()) {
+		/*$detect = new MobileDetect();
+		if ($detect->isMobile() || $this->req->get('_version') == 'mobile') {
 			$pinfo         = pathinfo($template_file);
-			$template_file = "{$pinfo['dirname']}/{$pinfo['filename']}_mobile.{$pinfo['extension']}";
-		}
+                        $filename = $pinfo['filename'];
+                        $ext = $pinfo['extension'];
+                        $tpl_path = Config::tpl('path');
+			$tpl_file = Helper::dir($pinfo['dirname'], "{$filename}_mobile.{$ext}");
+                        if(file_exists(Helper::dir($tpl_path, $tpl_file))){
+                                $template_file = $tpl_file;
+                        }
+		}*/
 		$this->display($template_file, $data);
 	}
 
 	//模版引擎渲染输出(如果仅需要渲染数据不需要输出，请使用render函数)
 	protected function display($template_file, $data = array(), $return = false) {
+		
+                $detect = new MobileDetect();
+		if ($detect->isMobile() || $this->req->get('_version') == 'mobile') {
+			$pinfo    = pathinfo($template_file);
+                        $filename = $pinfo['filename'];
+                        $ext      = $pinfo['extension'];
+                        $tpl_path = Config::tpl('path');
+			$tpl_file = Helper::dir($pinfo['dirname'], "{$filename}_mobile.{$ext}");
+                        if(file_exists(Helper::dir($tpl_path, $tpl_file))){
+                                $template_file = $tpl_file;
+                        }
+		}
+                
 		$output = $this->render($template_file, $data);
 		//直接返回
 		if ($return) {
@@ -143,7 +178,7 @@ class Controller {
 			break;
 		default: //html
 			$back_url = $this->req->gpc('_back_url');
-			if (!$back_url) {
+			if (!$back_url && isset($_SERVER['HTTP_REFERER'])) {
 				$back_url = $_SERVER['HTTP_REFERER'];
 			}
 			$data = $this->render('message/error.html', array(

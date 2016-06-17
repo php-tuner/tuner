@@ -13,7 +13,8 @@ class Model {
 	 */
 	public function __call($func, $args) {
 		if (!method_exists($this->db, $func)) {
-			throw new Exception("not found $func in model.");
+                        $class_name = get_class($this);
+			throw new Exception("not found({$class_name}::{$func}).");
 		}
 		return call_user_func_array(array($this->db, $func), $args);
 	}
@@ -50,43 +51,83 @@ class Model {
 		return $this->queryCacheRows($sql, $cache_time);
 	}
 
-	private function buildSql($where_array, $table = '') {
+	protected function buildSql($where_array, $table = '') {
 		$table || $table = $this->table;
 		$table           = $this->escape($table);
 		$where_str       = $this->getWhereStr($where_array);
 		$sql             = "SELECT * FROM `$table` $where_str";
 		return $sql;
 	}
-
+        
+	protected function buildCountSql($where_array, $table = '') {
+		$table || $table = $this->table;
+		$table           = $this->escape($table);
+		$where_str       = $this->getWhereStr($where_array);
+		$sql             = "SELECT count(*) FROM `$table` $where_str";
+		return $sql;
+	}
+        
+        // 获取单条记录
 	public function getRow($where_array, $table = '') {
 		$sql = $this->buildSql($where_array, $table);
 		$sql .= " LIMIT 1";
 		return $this->queryRow($sql);
 	}
 
+        // 获取多条记录
 	public function getRows($where_array, $table = '') {
 		$sql = $this->buildSql($where_array, $table);
 		return $this->queryRows($sql);
 	}
+        
+        //分页获取
+	public function getPageRows($where_array, $order = '', $limit = '', $table = '') {
+		$sql = $this->buildSql($where_array, $table);
+                $count_sql = $this->buildCountSql($where_array, $table);
+                $result = array(
+                        'count' => $this->queryFirst($count_sql),
+                        'rows' => array(),
+                );
+                if(!$result['count']){
+                        return $result;
+                }
+                if($order){
+                        $sql .= " $order ";
+                }
+                if($limit){
+                        $sql .= " $limit ";
+                }
+		$result['rows'] = $this->queryRows($sql);
+                return $result;
+	}
 
 	// 转义字符
 	public function escape($v) {
-		//Todo 可以去掉
-		if (function_exists('mysql_escape_string')) {
-			return mysql_escape_string($v);
-		}
 		$search  = array("\\", "\x00", "\n", "\r", "'", '"', "\x1a");
 		$replace = array("\\\\", "\\0", "\\n", "\\r", "\'", '\"', "\\Z");
 		return str_replace($search, $replace, $v);
 	}
 
 	// get sql where str
-	protected function getWhereStr($where_array) {
+        /*
+         //where_array 支持的条件表达方式
+         $where_array = array(
+                'status' => 1,
+                'id' => array(1, 2, 3),
+                'status' => array('!=' => 1),
+                'title' => array('like' => '%hello%'),
+        );
+        */
+	public function getWhereStr($where_array) {
 		if (!is_array($where_array) || !$where_array) {
 			return false;
 		}
 		$where = array();
 		foreach ($where_array as $key => $value) {
+                        //Todo be more safe check
+                        if(stripos($key, '.') === false){
+                                $key = " `$key` ";
+                        }
 			if (is_array($value)) {
 				$in_value = array();
 				foreach ($value as $k => $v) {
@@ -97,27 +138,27 @@ class Model {
 						$k = $this->escape($k);
 						if (is_array($v)) {
 							$v       = implode("','", array_map(array($this, 'escape'), $v));
-							$where[] = " `$key` $k ('$v') ";
+							$where[] = " $key $k ('$v') ";
 						} else {
 							$v       = $this->escape($v);
-							$where[] = " `$key` $k '$v' ";
+							$where[] = " $key $k '$v' ";
 						}
 					}
 				}
 				if ($in_value) {
 					$in_value = implode("','", $in_value);
-					$where[]  = " `$key` in( '$in_value' ) ";
+					$where[]  = " $key in( '$in_value' ) ";
 				}
 			} else {
 				$value   = $this->escape($value);
-				$where[] = " `$key` = '$value' ";
+				$where[] = " $key = '$value' ";
 			}
 		}
 		return " WHERE " . implode(' AND ', $where);
 	}
 
 	// get sql set str
-	protected function getSetStr($data_array) {
+	public function getSetStr($data_array) {
 		if (!is_array($data_array) || !$data_array) {
 			throw new Exception("set array invalid");
 		}
