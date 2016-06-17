@@ -56,22 +56,10 @@ class Response {
 	}
 
 	// 重定向
-	public function redirect($url, $code = 302) {
+	public function redirect($url, $code = 302, $halt = true) {
 		// Log::file("$url", 'redirect');
 		header("Location: $url", true, $code);
-		$html = <<<HTML
-<html>
-	<head>
-		<meta http-equiv="refresh" content="0;url=$url">
-	</head>
-	<body>
-		<p>Please follow <a href="$url">this link</a>.</p>
-	</body>
-</html>
-
-HTML;
-		$this->html($html);
-		exit(0);
+		$halt && exit(0);
 	}
 
 	//自动识别输出格式

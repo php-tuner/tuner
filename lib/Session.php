@@ -25,8 +25,9 @@ class Session {
 	public static function getOnce($key) {
 		self::start();
 		if (isset($_SESSION[$key])) {
+			$val = $_SESSION[$key];
 			unset($_SESSION[$key]);
-			return $_SESSION[$key];
+			return $val;
 		}
 		return null;
 	}

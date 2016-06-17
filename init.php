@@ -66,21 +66,12 @@ function _createLoader_($controller_dir, $model_dir, $final_dir) {
 		}
 		foreach ($scan_dirs as $dir) {
 			$filepath = "$dir/{$class}.php";
-			//echo $filepath.PHP_EOL;
 			if (file_exists($filepath)) {
 				require $filepath;
 				break;
 			}
 		}
 	};
-}
-
-if (!function_exists('mysql_escape_string')) {
-	function mysql_escape_string($v) {
-		$search  = array("\\", "\x00", "\n", "\r", "'", '"', "\x1a");
-		$replace = array("\\\\", "\\0", "\\n", "\\r", "\'", '\"', "\\Z");
-		return str_replace($search, $replace, $v);
-	}
 }
 
 // composer autoload

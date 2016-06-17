@@ -7,12 +7,12 @@ class App {
 	// 初始化
 	public function __construct() {
 		// 初始化开始
-		Log::init(Request::get('debug') == 'dodebug');
-		/*switch(Config::$mode){
-			            ini_set('display_errrors', 1);
-			            error_reporting(E_ALL);
-		*/
-
+		$is_debug = Request::get('debug') == 'dodebug';
+		Log::init($is_debug);
+		if ($is_debug && Config::$mode == 'dev') {
+			ini_set('display_errors', 1);
+			error_reporting(E_ALL);
+		}
 	}
 
 	// 执行处理流程
@@ -76,11 +76,10 @@ class App {
 				//子目录
 				$sub_dir = call_user_func_array('Helper::dir', array_slice($params, 0, $controller_pos));
 				//$req->base_url || $req->base_url = implode('/',  array_slice($params, 0, $controller_pos));
-				//Log::debug($route_uri, $req->base_url, $path, $params);
 
 				$controller = isset($params[$controller_pos]) ? $params[$controller_pos] : Config::common('defaultController');
+				$controller = str_replace(' ', '', ucwords(str_replace(CAMEL_CLASS_SEP, ' ', $controller)));
 				$class      = ucwords($controller) . "Controller";
-
 				//尝试加载控制器文件
 				/*
 	                                $controller_path = Helper::dir($controller_dir, "{$class}.php");
@@ -88,7 +87,7 @@ class App {
 	                                        //是否需要抛出异常，替代直接返回
 	                                        return $res->notFound();
 	                                }
-*/
+                                */
 				//controller优先查找当前目录
 				spl_autoload_register(_createLoader_(
 					$controller_dir,
@@ -97,16 +96,17 @@ class App {
 				), true, true);
 
 				if (!class_exists($class)) {
-					throw new Exception('not found controller');
+					throw new Exception("not found(controller: $class)");
 				}
 				//实例化控制器
 				$c = new $class($req, $res, $cfg);
 				//寻找控制器方法
-				$action = isset($params[$controller_pos + 1]) && $params[$controller_pos + 1] ? $params[$controller_pos + 1] : Config::common('defaultAction');
+				$action = isset($params[$controller_pos + 1]) && preg_match('/^[a-zA-Z]+/i', $params[$controller_pos + 1]) ? $params[$controller_pos + 1] : Config::common('defaultAction');
 				//分隔符也许可以定制
 				$action = str_replace(' ', '', ucwords(str_replace(CAMEL_CLASS_SEP, ' ', $action)));
+				//Log::debug($route_uri, $req->base_url, $path, $params, $controller, $action);
 				if (!method_exists($c, $action)) {
-					$action = 'notFound';
+					$action = $c->default_action; //"not found(action: $action)";
 				}
 				//捕获应用层异常，交给controller 处理
 				try {

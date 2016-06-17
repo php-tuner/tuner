@@ -305,10 +305,10 @@ class Http {
 					}
 				}
 			}
-			if ($force_urlencoded && !is_string($params)) {
+			if ($force_urlencoded && !is_string($params) && $params) {
 				//如果有子段是@开头, php curl 会解析成需要上传文件，而且如果没有严格的用户输入过滤，可能会带来安全问题。
 				//所以我们转换成字符串，禁止用@方式上传文件。
-				$params = http_build_query($params, '', '&');
+				$params = http_build_query((array) $params, '', '&');
 			}
 			if ($params) {
 				curl_setopt($ch, CURLOPT_POST, true);
