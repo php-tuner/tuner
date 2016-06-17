@@ -7,12 +7,12 @@ class App {
 	// 初始化
 	public function __construct() {
 		// 初始化开始
-                $is_debug = Request::get('debug') == 'dodebug';
+		$is_debug = Request::get('debug') == 'dodebug';
 		Log::init($is_debug);
-                if($is_debug && Config::$mode == 'dev'){
-                        ini_set('display_errors', 1);
-                        error_reporting(E_ALL);
-                }
+		if ($is_debug && Config::$mode == 'dev') {
+			ini_set('display_errors', 1);
+			error_reporting(E_ALL);
+		}
 	}
 
 	// 执行处理流程
@@ -102,11 +102,11 @@ class App {
 				$c = new $class($req, $res, $cfg);
 				//寻找控制器方法
 				$action = isset($params[$controller_pos + 1]) && preg_match('/^[a-zA-Z]+/i', $params[$controller_pos + 1]) ? $params[$controller_pos + 1] : Config::common('defaultAction');
-                                //分隔符也许可以定制
+				//分隔符也许可以定制
 				$action = str_replace(' ', '', ucwords(str_replace(CAMEL_CLASS_SEP, ' ', $action)));
 				//Log::debug($route_uri, $req->base_url, $path, $params, $controller, $action);
 				if (!method_exists($c, $action)) {
-					$action = $c->default_action;//"not found(action: $action)";
+					$action = $c->default_action; //"not found(action: $action)";
 				}
 				//捕获应用层异常，交给controller 处理
 				try {

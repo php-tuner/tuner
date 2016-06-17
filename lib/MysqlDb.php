@@ -107,8 +107,8 @@ class MysqlDb {
 
 	//执行SQL
 	public function query($sql, $force_new = false) {
-		$sql       = trim($sql);
-                //preg_match('/^\s*"?(SET|INSERT|UPDATE|DELETE|REPLACE|CREATE|DROP|TRUNCATE|LOAD|COPY|ALTER|RENAME|GRANT|REVOKE|LOCK|UNLOCK|REINDEX)\s/i', $sql);
+		$sql = trim($sql);
+		//preg_match('/^\s*"?(SET|INSERT|UPDATE|DELETE|REPLACE|CREATE|DROP|TRUNCATE|LOAD|COPY|ALTER|RENAME|GRANT|REVOKE|LOCK|UNLOCK|REINDEX)\s/i', $sql);
 		$is_select = preg_match('/^SELECT\s+/i', $sql);
 		//非事务状态下自动切换主从
 		if (!$this->in_transaction) {

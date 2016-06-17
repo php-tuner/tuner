@@ -13,7 +13,7 @@ class Model {
 	 */
 	public function __call($func, $args) {
 		if (!method_exists($this->db, $func)) {
-                        $class_name = get_class($this);
+			$class_name = get_class($this);
 			throw new Exception("not found({$class_name}::{$func}).");
 		}
 		return call_user_func_array(array($this->db, $func), $args);
@@ -58,7 +58,7 @@ class Model {
 		$sql             = "SELECT * FROM `$table` $where_str";
 		return $sql;
 	}
-        
+
 	protected function buildCountSql($where_array, $table = '') {
 		$table || $table = $this->table;
 		$table           = $this->escape($table);
@@ -66,39 +66,39 @@ class Model {
 		$sql             = "SELECT count(*) FROM `$table` $where_str";
 		return $sql;
 	}
-        
-        // 获取单条记录
+
+	// 获取单条记录
 	public function getRow($where_array, $table = '') {
 		$sql = $this->buildSql($where_array, $table);
 		$sql .= " LIMIT 1";
 		return $this->queryRow($sql);
 	}
 
-        // 获取多条记录
+	// 获取多条记录
 	public function getRows($where_array, $table = '') {
 		$sql = $this->buildSql($where_array, $table);
 		return $this->queryRows($sql);
 	}
-        
-        //分页获取
+
+	//分页获取
 	public function getPageRows($where_array, $order = '', $limit = '', $table = '') {
-		$sql = $this->buildSql($where_array, $table);
-                $count_sql = $this->buildCountSql($where_array, $table);
-                $result = array(
-                        'count' => $this->queryFirst($count_sql),
-                        'rows' => array(),
-                );
-                if(!$result['count']){
-                        return $result;
-                }
-                if($order){
-                        $sql .= " $order ";
-                }
-                if($limit){
-                        $sql .= " $limit ";
-                }
+		$sql       = $this->buildSql($where_array, $table);
+		$count_sql = $this->buildCountSql($where_array, $table);
+		$result    = array(
+			'count' => $this->queryFirst($count_sql),
+			'rows'  => array(),
+		);
+		if (!$result['count']) {
+			return $result;
+		}
+		if ($order) {
+			$sql .= " $order ";
+		}
+		if ($limit) {
+			$sql .= " $limit ";
+		}
 		$result['rows'] = $this->queryRows($sql);
-                return $result;
+		return $result;
 	}
 
 	// 转义字符
@@ -109,25 +109,25 @@ class Model {
 	}
 
 	// get sql where str
-        /*
-         //where_array 支持的条件表达方式
-         $where_array = array(
-                'status' => 1,
-                'id' => array(1, 2, 3),
-                'status' => array('!=' => 1),
-                'title' => array('like' => '%hello%'),
-        );
-        */
+	/*
+	         //where_array 支持的条件表达方式
+	         $where_array = array(
+	                'status' => 1,
+	                'id' => array(1, 2, 3),
+	                'status' => array('!=' => 1),
+	                'title' => array('like' => '%hello%'),
+	        );
+*/
 	public function getWhereStr($where_array) {
 		if (!is_array($where_array) || !$where_array) {
 			return false;
 		}
 		$where = array();
 		foreach ($where_array as $key => $value) {
-                        //Todo be more safe check
-                        if(stripos($key, '.') === false){
-                                $key = " `$key` ";
-                        }
+			//Todo be more safe check
+			if (stripos($key, '.') === false) {
+				$key = " `$key` ";
+			}
 			if (is_array($value)) {
 				$in_value = array();
 				foreach ($value as $k => $v) {

@@ -32,30 +32,30 @@ class Route {
 			}
 			foreach ($routes as $pattern => $action) {
 				if (preg_match($pattern, $subject, $match)) {
-                                        if(!$action && isset($match['controller'])){
+					if (!$action && isset($match['controller'])) {
 						$class  = ucwords($match['controller']) . "Controller";
-                                                $action = array($class);
-                                        }
+						$action = array($class);
+					}
 					if (is_array($action)) {
 						list($class, $method) = $action;
-                                                if(!$method && isset($match['action'])){
-                                                      $method =  $match['action']; 
-                                                }
+						if (!$method && isset($match['action'])) {
+							$method = $match['action'];
+						}
 						if (self::isController($class)) {
-                                                        $obj = new $class($req, $res, $cfg);
-                                                        if(!method_exists($obj, $method)){
-                                                                throw new Exception("not found(action: $method)");
-                                                        }
+							$obj = new $class($req, $res, $cfg);
+							if (!method_exists($obj, $method)) {
+								throw new Exception("not found(action: $method)");
+							}
 							$action = array($obj, $method);
 						}
-        					if (is_callable($action)) {
-        						return call_user_func_array($action, array('params' => $match));
-        					}
-                                        }elseif(is_string($action) && $action){
-					       foreach($match as $k => $v){
-                                                       $action = str_replace('$'.$k, $v, $action);
-                                               } 
-                                               $req->route_uri = $action;
+						if (is_callable($action)) {
+							return call_user_func_array($action, array('params' => $match));
+						}
+					} elseif (is_string($action) && $action) {
+						foreach ($match as $k => $v) {
+							$action = str_replace('$' . $k, $v, $action);
+						}
+						$req->route_uri = $action;
 					}
 				}
 			}
