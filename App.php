@@ -59,7 +59,7 @@ class App {
 				//$pathinfo['filename'] && $params[] = $pathinfo['filename'];
 				$len = count($params);
 				//默认倒数第二个是controller, 倒数第一个是action
-				$controller_pos = $len - 2;
+				$controller_pos = $len > 1 ? $len - 2 : 0;
 				//从DOCUMENT_ROOT开始找起
 				$controller_dir = APP_CONTROLLER_DIR;
 				//尝试匹配子目录(大于三层目录时)
