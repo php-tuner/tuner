@@ -154,7 +154,7 @@ class Request {
 			} else if (isset($_SERVER["REMOTE_ADDR"])) {
 				return $_SERVER["REMOTE_ADDR"];
 			} else {
-				return 'Error';
+				return 'no client ip';
 			}
 		} else {
 			if (getenv('HTTP_X_FORWARDED_FOR')) {
@@ -164,7 +164,7 @@ class Request {
 			} else if (getenv('REMOTE_ADDR')) {
 				return getenv('REMOTE_ADDR');
 			} else {
-				return 'Error';
+				return 'no client ip';
 			}
 		}
 	}
