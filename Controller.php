@@ -106,22 +106,6 @@ class Controller {
 		), $data), $this->res->charset);
 	}
 
-	//响应式渲染模版(废弃)
-	protected function reponsive($template_file, $data = array()) {
-		/*$detect = new MobileDetect();
-					if ($detect->isMobile() || $this->req->get('_version') == 'mobile') {
-						$pinfo         = pathinfo($template_file);
-			                        $filename = $pinfo['filename'];
-			                        $ext = $pinfo['extension'];
-			                        $tpl_path = Config::tpl('path');
-						$tpl_file = Helper::dir($pinfo['dirname'], "{$filename}_mobile.{$ext}");
-			                        if(file_exists(Helper::dir($tpl_path, $tpl_file))){
-			                                $template_file = $tpl_file;
-			                        }
-		*/
-		$this->display($template_file, $data);
-	}
-
 	//模版引擎渲染输出(如果仅需要渲染数据不需要输出，请使用render函数)
 	protected function display($template_file, $data = array(), $return = false) {
 
@@ -189,27 +173,6 @@ class Controller {
 		}
 		//avoid call child method implemention
 		self::output($data);
-	}
-
-	//输出信息(不要用这个方法！！！！)
-	//Todo: delete this function
-	protected static function showMsg($text, $code, $type, $format) {
-		switch ($format) {
-		case 'xml':
-		case 'json':
-			$data = array(
-				'text' => $text,
-				'code' => $code,
-				'type' => $type,
-			);
-			break;
-		case 'text':
-			$data = "error_code: {$code}" . PHP_EOL . "error_msg:{$msg}";
-			break;
-		default:
-			$data = "error_code: {$code}<br/>error_msg:{$msg}";
-		}
-		$this->$format($data);
 	}
 
 	//404 not found(Todo: 优化)
