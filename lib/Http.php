@@ -181,7 +181,7 @@ class Http {
 			$header_lines                                                             = '';
 			while (!feof($fp)) {
 				$line = fgets($fp, 256);
-				if (empty(trim($line))) {
+				if (!trim($line)) {
 					break;
 				}
 				$header_lines .= $line;
@@ -278,10 +278,10 @@ class Http {
 			return array(new HttpResponse('', '', '', new Exception("无效请求(request_list empty)")));
 		}
 		$chs = curl_multi_init();
-		//使用HTTP长连接
-		if (function_exists("curl_multi_setopt")) {
+		//使用HTTP长连接(启用后用时反而会增长！)
+		/*if (function_exists("curl_multi_setopt")) {
 			curl_multi_setopt($chs, CURLMOPT_PIPELINING, 1);
-		}
+		}*/
 		$curl_list = array();
 		foreach ($request_list as $req) {
 			list($url, $params, $headers) = array_values($req);
