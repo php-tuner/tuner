@@ -128,8 +128,10 @@ class MysqlDb {
 			Log::debug($err_msg);
 			//记录错误日志
 			$this->log($err_msg);
-			//MySQL server has gone away
-			if ($info[1] == '2006' && !$force_new) {
+			if (in_array($info[1], array(
+                                '2006', //MySQL server has gone away
+                                '2013', //Lost connection to MySQL server during query
+                        )) && !$force_new) {
 				$this->log("reconnect" . print_r($link, true), "info");
 				//wait a moment
 				sleep(1);
