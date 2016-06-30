@@ -77,7 +77,7 @@ class App {
 				$sub_dir = call_user_func_array('Helper::dir', array_slice($params, 0, $controller_pos));
 				//$req->base_url || $req->base_url = implode('/',  array_slice($params, 0, $controller_pos));
 
-				$controller = isset($params[$controller_pos]) ? $params[$controller_pos] : Config::common('defaultController');
+				$controller = isset($params[$controller_pos]) && preg_match('/^[a-zA-Z]+/i', $params[$controller_pos]) ? $params[$controller_pos] : Config::common('defaultController');
 				$controller = str_replace(' ', '', ucwords(str_replace(CAMEL_CLASS_SEP, ' ', $controller)));
 				$class      = ucwords($controller) . "Controller";
 				//尝试加载控制器文件
