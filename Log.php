@@ -48,7 +48,7 @@ class Log {
 		if (stripos($dir, '/') !== 0) {
 			$base_dir = Config::site('log_dir');
 			if (!$base_dir) {
-				throw new Exception("须设置日志记录目录～");
+                                return trigger_error('须设置日志记录目录～');
 			}
 			$dir = Helper::dir($base_dir, $dir);
 		}
