@@ -193,24 +193,31 @@ class Http {
 			//分块传输编码只在HTTP协议1.1版本（HTTP/1.1）中提供
 			if (isset($headers['Transfer-Encoding']) && $headers['Transfer-Encoding'] == 'chunked') {
 				while (!feof($fp)) {
-					$line = fgets($fp, 256);
+					$line = fgets($fp, 1024);
 					if ($line && preg_match('/^([0-9a-f]+)/i', $line, $matches)) {
 						$len = hexdec($matches[1]);
 						if ($len == 0) {
 							break; //maybe have some other header
 						}
-						$line = fread($fp, $len);
+						while ($len > 0) {
+							$tmp_data = fread($fp, $len);
+							$body .= $tmp_data;
+							$len = $len - strlen($tmp_data);
+						};
 					}
-					$body .= $line;
 				}
 			} else if (isset($headers['Content-Length']) && $len = $headers['Content-Length']) {
-				$body .= fread($fp, $len);
+				while ($len > 0) {
+					$tmp_data = fread($fp, $len);
+					$body .= $tmp_data;
+					$len = $len - strlen($tmp_data);
+				};
 			} else {
 				while (!feof($fp)) {
 					$body .= fread($fp, 1024 * 8);
 				}
 			}
-			if ($body && $headers['Content-Encoding'] == 'gzip') {
+			if ($body && isset($headers['Content-Encoding']) && $headers['Content-Encoding'] == 'gzip') {
 				$body = gzinflate(substr($body, 10));
 			}
 		}
@@ -220,7 +227,7 @@ class Http {
 			return new HttpResponse($http_status, $headers, $body, new Exception("Connection timed out!"));
 		}
 		// 重定向处理
-		if ($max_redirect > 0 && filter_var($headers['Location'], FILTER_VALIDATE_URL) && substr($http_status['code'], 0, 1) == 3) {
+		if (substr($http_status['code'], 0, 1) == 3 && $max_redirect > 0 && isset($headers['Location']) && filter_var($headers['Location'], FILTER_VALIDATE_URL)) {
 			return self::socketRequest($headers['Location'], $params = array(), $headers = array(), $wait_result, $connect_timeout, $read_timeout, --$max_redirect);
 		}
 		//$uri = $info['uri'];
