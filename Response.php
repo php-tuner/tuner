@@ -34,7 +34,13 @@ class Response {
 		switch (true) {
 		case $args_len == 1 && is_array($args[0]):
 			foreach ($args[0] as $k => $v) {
-				$this->header[] = "{$k}:{$v}";
+				if (is_array($v)) {
+					foreach ($v as $_v) {
+						$this->header[] = "{$k}:{$_v}";
+					}
+				} else {
+					$this->header[] = "{$k}:{$v}";
+				}
 			}
 			break;
 		case $args_len == 1 && is_string($args[0]):
