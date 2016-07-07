@@ -133,8 +133,6 @@ class MysqlDb {
 				'2013', //Lost connection to MySQL server during query
 			)) && !$force_new) {
 				$this->log("reconnect" . print_r($link, true), "info");
-				//wait a moment
-				sleep(1);
 				return $this->query($sql, true);
 			} else {
 				//是否要抛出异常
