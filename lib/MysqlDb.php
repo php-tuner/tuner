@@ -68,28 +68,29 @@ class MysqlDb {
 	//连接数据库
 	public function getRawLink($type = '', $force_new = false) {
 		$type || $type = $this->link_type;
-		if (isset(self::$links[$type]) && !$force_new) {
-			return self::$links[$type];
-		}
 		if (!isset($this->config[$type])) {
 			throw new Exception("not found $type config");
 		}
-		self::$links[$type] = null; //destory it
-		$cfg                = $this->config[$type];
-		$host               = $cfg['host'];
-		$user               = $cfg['user'];
-		$port               = isset($cfg['port']) ? $cfg['port'] : 3306;
-		$password           = $cfg['password'];
-		$db_name            = $this->default_db ? $this->default_db : $cfg['dbname'];
-		$charset            = isset($cfg['charset']) ? $cfg['charset'] : 'utf8';
-		$dsn                = "mysql:dbname={$db_name};host={$host};port={$port};charset={$charset}";
+		$cfg      = $this->config[$type];
+		$host     = $cfg['host'];
+		$user     = $cfg['user'];
+		$password = $cfg['password'];
+		$port     = isset($cfg['port']) ? $cfg['port'] : 3306;
+		$db_name  = $this->default_db ? $this->default_db : $cfg['dbname'];
+		$charset  = isset($cfg['charset']) ? $cfg['charset'] : 'utf8';
+		$dsn      = "mysql:dbname={$db_name};host={$host};port={$port};charset={$charset}";
+		$link_key = md5(json_encode($cfg) . $db_name);
+		if (isset(self::$links[$link_key]) && !$force_new) {
+			return self::$links[$link_key];
+		}
+		self::$links[$link_key] = null; //destory it
 		try {
 			$link = new PDO($dsn, $user, $password, Config::pdo());
 		} catch (Exception $e) {
 			$this->log("erorr:{$e->getMessage()}, dsn: $dsn", "info");
 			throw new $e;
 		}
-		return self::$links[$type] = $link;
+		return self::$links[$link_key] = $link;
 	}
 
 	//切换主从
