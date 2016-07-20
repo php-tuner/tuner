@@ -120,9 +120,11 @@ class MysqlDb {
 			}
 		}
 		$link = $this->getRawLink('', $force_new);
-		Log::debug($link);
-		Log::debug($sql);
-		$result = $link->query($sql);
+		//Log::debug($link);
+		$start_time = microtime(true);
+		$result     = $link->query($sql);
+		$used_time  = microtime(true) - $start_time;
+		Log::debug("sql: $sql, time: $used_time sec");
 		if (!$result) {
 			$info    = $link->errorInfo();
 			$err_msg = "{$info[0]}:{$info[1]}:{$info[2]}\t sql:$sql";
