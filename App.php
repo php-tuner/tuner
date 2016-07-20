@@ -5,9 +5,8 @@
 class App {
 
 	// 初始化
-	public function __construct() {
+	public function __construct($is_debug = false) {
 		// 初始化开始
-		$is_debug = Request::get('debug') == 'dodebug';
 		Log::init($is_debug);
 		if ($is_debug && Config::$mode == 'dev') {
 			ini_set('display_errors', 1);
@@ -16,9 +15,9 @@ class App {
 	}
 
 	// 执行处理流程
-	public static function run() {
-		$app = new self();
+	public static function run($is_debug = false) {
 		// 如果用cli方式运行(不去改变$_SERVER变量)
+		$app = new self($is_debug);
 		if (php_sapi_name() === 'cli') {
 			// use $_SERVER['argv'] instead of $argv(not available)
 			$req = new RequestCli($_SERVER['argv'][1], getopt('d'));
@@ -27,7 +26,9 @@ class App {
 		}
 		// 使用PATH_INFO路由
 		$req->route_uri = isset($_SERVER['PATH_INFO']) ? $_SERVER['PATH_INFO'] : $req->uri;
-		$req->base_url  = "http://{$req->header['Host']}";
+		$is_https       = isset($_SERVER['SERVER_PORT']) && $_SERVER['SERVER_PORT'] == '443';
+		$req->base_url  = $is_https ? "https" : 'http';
+		$req->base_url .= "://{$req->header['Host']}";
 		if ($req->route_uri) {
 			$base_pos = stripos($_SERVER['REQUEST_URI'], $req->route_uri);
 			$req->base_url .= parse_url(substr($_SERVER['REQUEST_URI'], 0, $base_pos), PHP_URL_PATH);
@@ -80,14 +81,6 @@ class App {
 				$controller = isset($params[$controller_pos]) && preg_match('/^[a-zA-Z]+/i', $params[$controller_pos]) ? $params[$controller_pos] : Config::common('defaultController');
 				$controller = str_replace(' ', '', ucwords(str_replace(CAMEL_CLASS_SEP, ' ', $controller)));
 				$class      = ucwords($controller) . "Controller";
-				//尝试加载控制器文件
-				/*
-	                                $controller_path = Helper::dir($controller_dir, "{$class}.php");
-	                                if(!file_exists($controller_path)){
-	                                        //是否需要抛出异常，替代直接返回
-	                                        return $res->notFound();
-	                                }
-                                */
 				//controller优先查找当前目录
 				spl_autoload_register(_createLoader_(
 					$controller_dir,
@@ -106,12 +99,15 @@ class App {
 				$action = str_replace(' ', '', ucwords(str_replace(CAMEL_CLASS_SEP, ' ', $action)));
 				//Log::debug($route_uri, $req->base_url, $path, $params, $controller, $action);
 				if (!method_exists($c, $action)) {
-					$action = $c->default_action; //"not found(action: $action)";
+					$action      = $c->default_action; //"not found(action: $action)";
+					$action_args = array_slice($params, $i + 1);
+				} else {
+					$action_args = array_slice($params, $i + 2);
 				}
 				//捕获应用层异常，交给controller 处理
 				try {
 					//action 后的做为参数
-					call_user_func_array(array($c, $action), array_slice($params, $i + 2));
+					call_user_func_array(array($c, $action), $action_args);
 				} catch (Exception $e) {
 					$c->_handleException($e);
 				}
