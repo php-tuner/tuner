@@ -108,16 +108,14 @@ class Model {
 		return str_replace($search, $replace, $v);
 	}
 
-	// get sql where str
-	/*
-	         //where_array 支持的条件表达方式
-	         $where_array = array(
-	                'status' => 1,
-	                'id' => array(1, 2, 3),
-	                'status' => array('!=' => 1),
-	                'title' => array('like' => '%hello%'),
-	        );
-*/
+        // get sql where str
+        // where_array 支持的条件表达方式
+        // $where_array = array(
+        //         'status' => 1,
+        //         'id' => array(1, 2, 3),
+        //         'status' => array('!=' => 1),
+        //         'title' => array('like' => '%hello%'),
+        // );
 	public function getWhereStr($where_array) {
 		if (!is_array($where_array) || !$where_array) {
 			return false;
@@ -230,7 +228,7 @@ class Model {
 		$re = array();
 		foreach ($rows as $row) {
 			foreach ($fields as $f) {
-				if (!is_string($f)) {
+				if (!is_string($f) || !isset($row[$f])) {
 					continue;
 				}
 				$re[$f][] = $row[$f];
