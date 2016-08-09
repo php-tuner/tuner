@@ -26,6 +26,8 @@ class App {
 		}
 		// 使用PATH_INFO路由
 		$req->route_uri = isset($_SERVER['PATH_INFO']) ? $_SERVER['PATH_INFO'] : $req->uri;
+		// 将多个／替换成一个
+		$req->route_uri = preg_replace('#/{1,}#', '/', $req->route_uri);
 		$is_https       = isset($_SERVER['SERVER_PORT']) && $_SERVER['SERVER_PORT'] == '443';
 		$req->base_url  = $is_https ? "https" : 'http';
 		$req->base_url .= "://{$req->header['Host']}";
@@ -46,7 +48,7 @@ class App {
 					$route_path = preg_replace('/\?(.*)/i', '', $req->route_uri);
 				}
 				$route_file_path = realpath(Helper::dir(APP_ROOT_DIR, $route_path));
-				if (is_file($route_file_path)) {
+				if (preg_match('#^/public/#', $route_path) && is_file($route_file_path)) {
 					$res->file($route_file_path);
 					return true;
 				}
@@ -106,6 +108,7 @@ class App {
 				}
 				//捕获应用层异常，交给controller 处理
 				try {
+                                        $action_args = array_map('urldecode', $action_args);
 					//action 后的做为参数
 					call_user_func_array(array($c, $action), $action_args);
 				} catch (Exception $e) {
