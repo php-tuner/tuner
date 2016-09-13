@@ -30,7 +30,7 @@ class App {
 		$req->route_uri = preg_replace('#/{1,}#', '/', $req->route_uri);
 		$is_https       = isset($_SERVER['SERVER_PORT']) && $_SERVER['SERVER_PORT'] == '443';
 		$req->base_url  = $is_https ? "https" : 'http';
-		$req->base_url .= "://{$req->header['Host']}";
+		isset($req->header['Host']) && $req->base_url .= "://{$req->header['Host']}";
 		if ($req->route_uri) {
 			$base_pos = stripos($_SERVER['REQUEST_URI'], $req->route_uri);
 			$req->base_url .= parse_url(substr($_SERVER['REQUEST_URI'], 0, $base_pos), PHP_URL_PATH);
