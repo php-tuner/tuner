@@ -80,7 +80,6 @@ class Controller {
 		if (preg_match('#^https?://#', $uri)) {
 			$url = $uri; //本身是绝对地址
 		} else {
-			$host     = $this->req->header['Host'];
 			$base_url = $this->req->base_url ? $this->req->base_url : Config::site('base_url');
 			$base_url = rtrim($base_url, '/');
 			$uri      = ltrim($uri, '/');
