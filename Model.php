@@ -108,15 +108,41 @@ class Model {
 		return str_replace($search, $replace, $v);
 	}
 
-        // get sql where str
-        // where_array 支持的条件表达方式
-        // $where_array = array(
-        //         'status' => 1,
-        //         'id' => array(1, 2, 3),
-        //         'status' => array('!=' => 1),
-        //         'title' => array('like' => '%hello%'),
-        // );
-	public function getWhereStr($where_array) {
+        public function getWhereStr(){
+                $str = '';
+                $have_opt_str = false;
+                $args = func_get_args();
+                $len = count($args);
+                $i = 0;
+                foreach($args as $v){
+                        $i++;
+                        if(is_array($v)){
+                                $v = $this->buildWhereStr($v);
+                                if($have_opt_str || ($len > 1 && $i == 1)){
+                                        $v = " ( $v ) ";
+                                        $have_opt_str = false;
+                                }
+                        }else{
+                                $upper_v = strtoupper($v);
+                                if(in_array($upper_v, array('AND', 'OR'))){
+                                        $v = $upper_v;
+                                        $have_opt_str = true;
+                                }
+                        }
+                        $str .= $v;
+                }
+                return $str ? " WHERE $str " : $str;
+        }
+
+	// build sql where str
+	// where_array 支持的条件表达方式
+	// $where_array = array(
+	//         'status' => 1,
+	//         'id' => array(1, 2, 3),
+	//         'status' => array('!=' => 1),
+	//         'title' => array('like' => '%hello%'),
+	// );        
+	private function buildWhereStr($where_array) {
 		if (!is_array($where_array) || !$where_array) {
 			return false;
 		}
@@ -152,7 +178,7 @@ class Model {
 				$where[] = " $key = '$value' ";
 			}
 		}
-		return " WHERE " . implode(' AND ', $where);
+		return implode(' AND ', $where);
 	}
 
 	// get sql set str
