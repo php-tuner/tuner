@@ -11,7 +11,7 @@ class MysqlDb {
 	private static $links = array();
 
 	//连接类型
-	private $link_type = 'slave';
+	private $link_type = '';
 
 	private $in_transaction = false;
 
@@ -66,8 +66,8 @@ class MysqlDb {
 	}
 
 	//连接数据库
-	public function getRawLink($type = '', $force_new = false) {
-		$type || $type = $this->link_type;
+	public function getRawLink($type = 'slave', $force_new = false) {
+		//$type || $type = $this->link_type;
 		if (!isset($this->config[$type])) {
 			throw new Exception("not found $type config");
 		}
@@ -112,14 +112,11 @@ class MysqlDb {
 		//preg_match('/^\s*"?(SET|INSERT|UPDATE|DELETE|REPLACE|CREATE|DROP|TRUNCATE|LOAD|COPY|ALTER|RENAME|GRANT|REVOKE|LOCK|UNLOCK|REINDEX)\s/i', $sql);
 		$is_select = preg_match('/^SELECT\s+/i', $sql);
 		//非事务状态下自动切换主从
-		if (!$this->in_transaction) {
-			if ($is_select) {
-				$this->changeLinkType('slave');
-			} else {
-				$this->changeLinkType('master');
-			}
+		$link_type = $this->link_type;
+		if (!$link_type) {
+			$link_type = $is_select ? 'slave' : 'master';
 		}
-		$link = $this->getRawLink('', $force_new);
+		$link = $this->getRawLink($link_type, $force_new);
 		//Log::debug($link);
 		$start_time = microtime(true);
 		$result     = $link->query($sql);
