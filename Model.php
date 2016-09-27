@@ -108,46 +108,38 @@ class Model {
 		return str_replace($search, $replace, $v);
 	}
 
-        public function getWhereStr(){
-                $str = '';
-                $have_opt_str = false;
-                $args = func_get_args();
-                $len = count($args);
-                $i = 0;
-                foreach($args as $v){
-                        $i++;
-                        if(is_array($v)){
-                                $v = $this->buildWhereStr($v);
-                                if($have_opt_str || ($len > 1 && $i == 1)){
-                                        $v = " ( $v ) ";
-                                        $have_opt_str = false;
-                                }
-                        }else{
-                                $upper_v = strtoupper($v);
-                                if(in_array($upper_v, array('AND', 'OR'))){
-                                        $v = $upper_v;
-                                        $have_opt_str = true;
-                                }
-                        }
-                        $str .= $v;
-                }
-                return $str ? " WHERE $str " : $str;
-        }
+	public function getWhereStr($where_array) {
+		$str = $this->buildCondStr($where_array);
+		return $str ? " WHERE $str " : $str;
+	}
 
-	// build sql where str
-	// where_array 支持的条件表达方式
-	// $where_array = array(
+	// build sql condition str
+	// cond_array 支持的条件表达方式
+	// $cond_array = array(
 	//         'status' => 1,
 	//         'id' => array(1, 2, 3),
 	//         'status' => array('!=' => 1),
 	//         'title' => array('like' => '%hello%'),
-	// );        
-	private function buildWhereStr($where_array) {
-		if (!is_array($where_array) || !$where_array) {
-			return false;
+	// );
+	private function buildCondStr($cond_array, $concate_str = 'AND') {
+		if (!is_array($cond_array) || !$cond_array) {
+			return '';
 		}
-		$where = array();
-		foreach ($where_array as $key => $value) {
+		$first_key = key($cond_array);
+		$first_val = current($cond_array);
+		$op        = is_string($first_val) ? strtoupper($first_val) : '';
+		if (is_int($first_key) && in_array($op, array('OR', 'AND'))) {
+			$_conds = array();
+			foreach (array_slice($cond_array, 1) as $val) {
+				if (!$val) {
+					continue;
+				}
+				$_conds[] = $this->buildCondStr($val);
+			}
+			return count($_conds) > 1 ? '( ' . implode(" ) $op ( ", $_conds) . ' )' : implode($op, $_conds);
+		}
+		$conds = array();
+		foreach ($cond_array as $key => $value) {
 			//Todo be more safe check
 			if (stripos($key, '.') === false) {
 				$key = " `$key` ";
@@ -162,23 +154,23 @@ class Model {
 						$k = $this->escape($k);
 						if (is_array($v)) {
 							$v       = implode("','", array_map(array($this, 'escape'), $v));
-							$where[] = " $key $k ('$v') ";
+							$conds[] = " $key $k ('$v') ";
 						} else {
 							$v       = $this->escape($v);
-							$where[] = " $key $k '$v' ";
+							$conds[] = " $key $k '$v' ";
 						}
 					}
 				}
 				if ($in_value) {
 					$in_value = implode("','", $in_value);
-					$where[]  = " $key in( '$in_value' ) ";
+					$conds[]  = " $key in( '$in_value' ) ";
 				}
 			} else {
 				$value   = $this->escape($value);
-				$where[] = " $key = '$value' ";
+				$conds[] = " $key = '$value' ";
 			}
 		}
-		return implode(' AND ', $where);
+		return implode($concate_str, $conds);
 	}
 
 	// get sql set str
