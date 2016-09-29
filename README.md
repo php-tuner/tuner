@@ -9,7 +9,6 @@ PHP version 5.3 or newer is recommended.
 1. 中文
 
 #License
-Please see the `license
-agreement <https://github.com/php-tuner/tuner/blob/master/LICENSE>`_.
+Please see the [license agreement](https://github.com/php-tuner/tuner/blob/master/LICENSE).
 
 
