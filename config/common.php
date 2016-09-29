@@ -1,4 +1,8 @@
 <?php
+// Copyright 2016 The PHP Tuner Authors. All rights reserved.
+// Use of this source code is governed by a GPL-3.0
+// license that can be found in the LICENSE file.
+
 return array(
 	//默认控制器
 	'defaultController' => 'default',

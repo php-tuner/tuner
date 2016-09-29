@@ -1,11 +1,10 @@
 <?php
-/**
- * 锁服务(用File模拟锁)
- * Author: tomheng
- * @date 2015-08-22
- *
- */
+// Copyright 2016 The PHP Tuner Authors. All rights reserved.
+// Use of this source code is governed by a GPL-3.0
+// license that can be found in the LICENSE file.
 
+
+// 锁服务(用File模拟锁)
 class FileLock {
 
 	private $all_lock_handles = array();

@@ -1,5 +1,7 @@
 <?php
-
+// Copyright 2016 The PHP Tuner Authors. All rights reserved.
+// Use of this source code is governed by a GPL-3.0
+// license that can be found in the LICENSE file.
 class Log {
 	private static $data     = array();
 	private static $is_debug = false;
@@ -70,7 +72,7 @@ class Log {
 		}
 		$filename .= ".txt";
 		$filepath = Helper::dir($dir, $filename);
-		$str      = trim($str);
+		$str      = trim(self::getVarString($str));
 		/*if (empty($str))
 			{
 				return false;

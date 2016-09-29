@@ -1,10 +1,9 @@
 <?php
-/**
- * HTTP 常用操作
- *
- * @package default
- * @author Heng Min Zhan
- */
+// Copyright 2016 The PHP Tuner Authors. All rights reserved.
+// Use of this source code is governed by a GPL-3.0
+// license that can be found in the LICENSE file.
+
+// HTTP 常用操作
 class Http {
 	// 默认User-Agent
 	public static $UA = "HTTP CLIENT(PHP)";

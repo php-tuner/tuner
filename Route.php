@@ -1,7 +1,10 @@
 <?php
+// Copyright 2016 The PHP Tuner Authors. All rights reserved.
+// Use of this source code is governed by a GPL-3.0
+// license that can be found in the LICENSE file.
+
 // 路由处理器
 // 负责将URL映射到对应的处理器
-
 class Route {
 
 	// 处理器列表

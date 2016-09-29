@@ -1,6 +1,9 @@
 <?php
-// 常用方法封装
+// Copyright 2016 The PHP Tuner Authors. All rights reserved.
+// Use of this source code is governed by a GPL-3.0
+// license that can be found in the LICENSE file.
 
+// 常用方法封装
 class Helper {
 
 	// $string： 明文 或 密文

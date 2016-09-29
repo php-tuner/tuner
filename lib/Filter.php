@@ -1,11 +1,9 @@
 <?php
-/**
- *
- * 过滤器
- * @author zhanhengmin@vread.cn
- * @date 2015-12-23
- *
- */
+// Copyright 2016 The PHP Tuner Authors. All rights reserved.
+// Use of this source code is governed by a GPL-3.0
+// license that can be found in the LICENSE file.
+
+// 过滤器
 class Filter {
 
 	//过滤xss

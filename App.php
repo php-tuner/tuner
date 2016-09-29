@@ -1,7 +1,10 @@
 <?php
+// Copyright 2016 The PHP Tuner Authors. All rights reserved.
+// Use of this source code is governed by a GPL-3.0
+// license that can be found in the LICENSE file.
+
 // 应用程序管理类
 // 负责框架内部外部数据流动传递
-
 class App {
 
 	// 初始化
@@ -12,6 +15,22 @@ class App {
 			ini_set('display_errors', 1);
 			error_reporting(E_ALL);
 		}
+	}
+
+	// must run in cgi mode
+	public static function runGGI($is_debug = false){
+		if(php_sapi_name() !== 'cgi'){
+			exit('must run in cgi mode');
+		}
+		self::run($is_debug);
+	}
+	
+	// must run in cli mode
+	public static function runCLI($is_debug = false){
+		if(php_sapi_name() !== 'cli'){
+			exit('must run in cli mode');
+		}
+		self::run($is_debug);
 	}
 
 	// 执行处理流程
@@ -108,7 +127,7 @@ class App {
 				}
 				//捕获应用层异常，交给controller 处理
 				try {
-                                        $action_args = array_map('urldecode', $action_args);
+					$action_args = array_map('urldecode', $action_args);
 					//action 后的做为参数
 					call_user_func_array(array($c, $action), $action_args);
 				} catch (Exception $e) {
