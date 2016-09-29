@@ -103,27 +103,6 @@ class Helper {
 		return in_array("{$ip[0]}", array('10', '172', '127'));
 	}
 
-	/**
-	 * @file
-	 * Defines a function wrapper for HTML Purifier for quick use.
-	 * @note ''HTMLPurifier()'' is NOT the same as ''new HTMLPurifier()''
-	 */
-
-	/**
-	 * Purify HTML.
-	 * @param string $html String HTML to purify
-	 * @param mixed $config Configuration to use, can be any value accepted by
-	 *        HTMLPurifier_Config::create()
-	 * @return string
-	 */
-	function HTMLPurifier($html, $config = null) {
-		static $purifier = false;
-		if (!$purifier) {
-			$purifier = new HTMLPurifier();
-		}
-		return $purifier->purify($html, $config);
-	}
-
 	//合并对象
 	public static function mergeObject($obj, $obj2) {
 		if (!is_object($obj2)) {
