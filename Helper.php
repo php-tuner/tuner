@@ -6,6 +6,7 @@
 // 常用方法封装
 class Helper {
 
+        // 此函数来自Discuz源码
 	// $string： 明文 或 密文
 	// $operation：DECODE表示解密,其它表示加密
 	// $key： 密匙
