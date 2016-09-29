@@ -6,7 +6,7 @@ PHP version 5.3 or newer is recommended.
 
 #User Guide
 
-1. 中文
+1. [中文](https://github.com/php-tuner/tuner/blob/master/doc/zh-user-guide.md)
 
 #License
 Please see the [license agreement](https://github.com/php-tuner/tuner/blob/master/LICENSE).
