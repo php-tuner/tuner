@@ -107,7 +107,7 @@ class MysqlDb {
 	}
 
 	//执行SQL
-	public function query($sql, $force_new = false) {
+	public function query($sql, $params = array(), $force_new = false, $options = array()) {
 		$sql = trim($sql);
 		//preg_match('/^\s*"?(SET|INSERT|UPDATE|DELETE|REPLACE|CREATE|DROP|TRUNCATE|LOAD|COPY|ALTER|RENAME|GRANT|REVOKE|LOCK|UNLOCK|REINDEX)\s/i', $sql);
 		$is_select = preg_match('/^SELECT\s+/i', $sql);
@@ -119,12 +119,22 @@ class MysqlDb {
 		$link = $this->getRawLink($link_type, $force_new);
 		//Log::debug($link);
 		$start_time = microtime(true);
-		$result     = $is_select ? $link->query($sql) : $link->exec($sql);
+		if($params){
+			$sth = $link->prepare($sql, $options);
+			if(!$sth->execute($params)){
+				$error_info = $sth->errorInfo();
+				$sth = false;
+			}
+		}else{
+			$sth = $link->query($sql);
+			if($sth === false){
+				$error_info = $link->errorInfo();
+			}
+		}
 		$used_time  = microtime(true) - $start_time;
 		Log::debug("sql: $sql, time: $used_time sec");
-		if ($result === false) {
-			$info    = $link->errorInfo();
-			$err_msg = "{$info[0]}:{$info[1]}:{$info[2]}\t sql:$sql";
+		if ($error_info) {
+			$err_msg = "{$error_info[0]}:{$error_info[1]}:{$error_info[2]}\t sql:$sql";
 			Log::debug($err_msg);
 			//记录错误日志
 			$this->log($err_msg);
@@ -133,13 +143,13 @@ class MysqlDb {
 				'2013', //Lost connection to MySQL server during query
 			)) && !$force_new) {
 				$this->log("reconnect" . print_r($link, true), "info");
-				return $this->query($sql, true);
+				return $this->query($sql, $params, true, $options);
 			} else {
 				//是否要抛出异常
 				throw new Exception("数据库操作发生错误");
 			}
 		}
-		return $result;
+		return $sth;
 	}
 
 	//执行SQL返回一条记录
