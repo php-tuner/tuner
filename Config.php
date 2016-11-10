@@ -24,6 +24,10 @@ class Config {
 			$filepath = "$dir/{$filename}.$ext";
 			if (file_exists($filepath)) {
 				$_cfg = require $filepath;
+				if(!$cfg){
+					$cfg = $_cfg;
+					continue;
+				}
 				switch (gettype($_cfg)) {
 				case 'object':
 					$cfg = Helper::mergeObject($cfg, $_cfg);
