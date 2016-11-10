@@ -16,8 +16,6 @@ class MysqlDb {
 	//连接类型
 	private $link_type = '';
 
-	private $in_transaction = false;
-
 	public function __construct($config, $dbname = '') {
 		$this->config     = $config;
 		$this->default_db = $dbname;
@@ -44,21 +42,20 @@ class MysqlDb {
 		$this->changeLinkType('master');
 		$link = $this->getRawLink();
 		$link->beginTransaction();
-		$this->in_transaction = true;
 	}
 
 	//提交事务
 	public function commit() {
 		$link = $this->getRawLink();
 		$link->commit();
-		$this->in_transaction = false;
+		$this->link_type = null;
 	}
 
 	//回滚事务
 	public function rollback() {
 		$link = $this->getRawLink();
 		$link->rollback();
-		$this->in_transaction = false;
+		$this->link_type = null;
 	}
 
 	// 转义字符
@@ -122,10 +119,10 @@ class MysqlDb {
 		$link = $this->getRawLink($link_type, $force_new);
 		//Log::debug($link);
 		$start_time = microtime(true);
-		$result     = $link->query($sql);
+		$result     = $is_select ? $link->query($sql) : $link->exec($sql);
 		$used_time  = microtime(true) - $start_time;
 		Log::debug("sql: $sql, time: $used_time sec");
-		if (!$result) {
+		if ($result === false) {
 			$info    = $link->errorInfo();
 			$err_msg = "{$info[0]}:{$info[1]}:{$info[2]}\t sql:$sql";
 			Log::debug($err_msg);
@@ -142,7 +139,7 @@ class MysqlDb {
 				throw new Exception("数据库操作发生错误");
 			}
 		}
-		return $is_select ? $result : $link->lastInsertId();
+		return $result;
 	}
 
 	//执行SQL返回一条记录
