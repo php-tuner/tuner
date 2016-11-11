@@ -109,15 +109,15 @@ class App {
 				), true, true);
 
 				if (!class_exists($class)) {
-					throw new Exception("not found(controller: $class)");
+					throw new Exception("not found(controller: $class)", 404);
 				}
 				//实例化控制器
 				$c = new $class($req, $res, $cfg);
 				//寻找控制器方法
 				if(isset($params[$controller_pos + 1])){
 					$action = $params[$controller_pos + 1];
-					if(!preg_match('/^[a-zA-Z_-]+$/i', $action)){
-						throw new Exception("action is illegal");
+					if(!preg_match('/^([a-zA-Z_\-]+)$/i', $action)){
+						throw new Exception("action is illegal", 500);
 					}
 					$action_args = array_slice($params, $i + 2);
 				}else{//目录请求
@@ -127,7 +127,7 @@ class App {
 				//分隔符也许可以定制
 				$action = str_replace(' ', '', ucwords(str_replace(CAMEL_CLASS_SEP, ' ', $action)));
 				if (!method_exists($c, $action)) {
-					throw new Exception("not found(action: $action)");
+					throw new Exception("not found(action: $action)", 404);
 				}
 				//捕获应用层异常，交给controller 处理
 				try {
@@ -141,10 +141,30 @@ class App {
 			Route::dispatch($req, $res, $cfg);
 		} catch (Exception $e) {
 			//Todo 需要优化
-			Log::debug($e);
-			$res->handleException($e);
+			self::handleException($e);
 		}
 		return $app;
+	}
+
+	//处理异常
+	public static function handleException($e) {
+		Log::debug($e);
+		$code                = $e->getCode() ? $e->getCode() : 500;
+		$msg                 = $e->getMessage();
+		header($msg, true, $code);
+		echo <<<HTML
+<!DOCTYPE html>
+<html>
+<head>
+<title>$msg - $code</title>
+<meta charset="utf-8" />
+</head>
+<body>
+	<h3>$msg - $code</h3>
+</body>
+</html>
+HTML;
+		exit(0);
 	}
 
 	//all done
