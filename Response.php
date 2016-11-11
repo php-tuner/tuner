@@ -271,23 +271,4 @@ class Response {
 		}
 	}
 
-	//异常处理(Todo: 调整参数顺序)
-	public function handleException($e, $halt = true, $req = null) {
-		$req == null && $req = new Request();
-		$format              = $req->format;
-		$code                = $e->getCode() ? $e->getCode() : 1;
-		$msg                 = $e->getMessage();
-		$data                = array(
-			'error_msg'  => $msg,
-			'error_code' => $code,
-		);
-		//$format = $req->format;
-		if (!method_exists('Response', $format)) {
-			$format = 'html';
-		}
-		//$res = new Response();
-		$this->$format($data);
-		$halt && exit();
-	}
-
 }
