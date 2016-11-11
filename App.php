@@ -97,7 +97,6 @@ class App {
 				}
 				//子目录
 				$sub_dir = call_user_func_array('Helper::dir', array_slice($params, 0, $controller_pos));
-				//$req->base_url || $req->base_url = implode('/',  array_slice($params, 0, $controller_pos));
 
 				$controller = isset($params[$controller_pos]) && preg_match('/^[a-zA-Z]+/i', $params[$controller_pos]) ? $params[$controller_pos] : Config::common('defaultController');
 				$controller = str_replace(' ', '', ucwords(str_replace(CAMEL_CLASS_SEP, ' ', $controller)));
@@ -115,15 +114,20 @@ class App {
 				//实例化控制器
 				$c = new $class($req, $res, $cfg);
 				//寻找控制器方法
-				$action = isset($params[$controller_pos + 1]) && preg_match('/^[a-zA-Z]+/i', $params[$controller_pos + 1]) ? $params[$controller_pos + 1] : Config::common('defaultAction');
+				if(isset($params[$controller_pos + 1])){
+					$action = $params[$controller_pos + 1];
+					if(!preg_match('/^[a-zA-Z_-]+$/i', $action)){
+						throw new Exception("action is illegal");
+					}
+					$action_args = array_slice($params, $i + 2);
+				}else{//目录请求
+					$action = $c->default_action ? $c->default_action : Config::common('defaultAction');
+					$action_args = array_slice($params, $i + 1);
+				}
 				//分隔符也许可以定制
 				$action = str_replace(' ', '', ucwords(str_replace(CAMEL_CLASS_SEP, ' ', $action)));
-				//Log::debug($route_uri, $req->base_url, $path, $params, $controller, $action);
 				if (!method_exists($c, $action)) {
-					$action      = $c->default_action; //"not found(action: $action)";
-					$action_args = array_slice($params, $i + 1);
-				} else {
-					$action_args = array_slice($params, $i + 2);
+					throw new Exception("not found(action: $action)");
 				}
 				//捕获应用层异常，交给controller 处理
 				try {
