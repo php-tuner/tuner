@@ -107,7 +107,7 @@ class MysqlDb {
 	}
 
 	//执行SQL
-	public function query($sql, $params = array(), $force_new = false, $options = array()) {
+	public function query($sql, $params = array(), $options = array(), $force_new = false) {
 		$sql = trim($sql);
 		//preg_match('/^\s*"?(SET|INSERT|UPDATE|DELETE|REPLACE|CREATE|DROP|TRUNCATE|LOAD|COPY|ALTER|RENAME|GRANT|REVOKE|LOCK|UNLOCK|REINDEX)\s/i', $sql);
 		$is_select = preg_match('/^SELECT\s+/i', $sql);
@@ -143,7 +143,7 @@ class MysqlDb {
 				'2013', //Lost connection to MySQL server during query
 			)) && !$force_new) {
 				$this->log("reconnect" . print_r($link, true), "info");
-				return $this->query($sql, $params, true, $options);
+				return $this->query($sql, $params, $options, true);
 			} else {
 				//是否要抛出异常
 				throw new Exception("数据库操作发生错误");
