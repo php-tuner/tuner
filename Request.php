@@ -34,11 +34,19 @@ class Request {
 		$this->format    = $this->getFormat();
 		$this->client_ip = static::getClientIp();
 		$this->is_ajax   = static::isAjax();
-		//如果没有content_type, 尝试自己解析post请求
-		//https://github.com/gfdev/javascript-jquery-transport-xdr
-		/*if($this->method == 'POST' && !$_SERVER['CONTENT_TYPE']){
-			parse_str($this->body, $_POST);
-		}*/
+		// 使用PATH_INFO路由
+		$this->route_uri = isset($_SERVER['PATH_INFO']) ? $_SERVER['PATH_INFO'] : $this->uri;
+		// 将多个／替换成一个
+		$this->route_uri = preg_replace('#/{1,}#', '/', $this->route_uri);
+		$is_https       = isset($_SERVER['SERVER_PORT']) && $_SERVER['SERVER_PORT'] == '443';
+		$this->base_url  = $is_https ? "https" : 'http';
+		isset($this->header['Host']) && $this->base_url .= "://{$this->header['Host']}";
+		if ($this->route_uri) {
+			$base_pos = stripos($_SERVER['REQUEST_URI'], $this->route_uri);
+			$this->base_url .= parse_url(substr($_SERVER['REQUEST_URI'], 0, $base_pos), PHP_URL_PATH);
+		} else {
+			$this->base_url .= $_SERVER['REQUEST_URI'];
+		}
 	}
 
 	public static function __callStatic($method, $args) {

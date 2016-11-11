@@ -10,7 +10,10 @@ class RequestCli extends Request {
 	private $fake_post = array();
 
 	//构造
-	public function __construct($uri, $post_data) {
+	public function __construct() {
+		$argv = $_SERVER['argv'];
+		$uri = isset($argv[1]) ? $argv[1] : '';
+		$post_data = isset($argv[2]) ? $argv[2] : '';
 		$this->init(); // 初始化
 		$this->method = empty($post_data) ? 'GET' : 'POST';
 		$this->time   = time();
@@ -19,6 +22,9 @@ class RequestCli extends Request {
 		$uri_info     = parse_url($uri);
 		isset($uri_info['query']) && parse_str($uri_info['query'], $this->fake_get);
 		$post_data && parse_str($post_data, $this->fake_post);
+		// 将多个／替换成一个
+		$this->route_uri = preg_replace('#/{1,}#', '/', $this->uri);
+		$this->base_url = '';
 	}
 
 	// http://php.net/cli

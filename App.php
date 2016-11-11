@@ -39,22 +39,9 @@ class App {
 		$app = new self($is_debug);
 		if (php_sapi_name() === 'cli') {
 			// use $_SERVER['argv'] instead of $argv(not available)
-			$req = new RequestCli($_SERVER['argv'][1], getopt('d'));
+			$req = new RequestCli();
 		} else {
 			$req = new Request();
-		}
-		// 使用PATH_INFO路由
-		$req->route_uri = isset($_SERVER['PATH_INFO']) ? $_SERVER['PATH_INFO'] : $req->uri;
-		// 将多个／替换成一个
-		$req->route_uri = preg_replace('#/{1,}#', '/', $req->route_uri);
-		$is_https       = isset($_SERVER['SERVER_PORT']) && $_SERVER['SERVER_PORT'] == '443';
-		$req->base_url  = $is_https ? "https" : 'http';
-		isset($req->header['Host']) && $req->base_url .= "://{$req->header['Host']}";
-		if ($req->route_uri) {
-			$base_pos = stripos($_SERVER['REQUEST_URI'], $req->route_uri);
-			$req->base_url .= parse_url(substr($_SERVER['REQUEST_URI'], 0, $base_pos), PHP_URL_PATH);
-		} else {
-			$req->base_url .= $_SERVER['REQUEST_URI'];
 		}
 		$res = new Response(Config::common('charset'));
 		$cfg = new Config();
