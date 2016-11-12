@@ -62,7 +62,7 @@ class App {
 				//$pathinfo = pathinfo(parse_url($req->uri, PHP_URL_PATH));
 				$ext    = isset($pathinfo['extension']) ? $pathinfo['extension'] : '';
 				$pathinfo['dirname'] = ltrim($pathinfo['dirname'], './');
-				$path = $pathinfo['dirname'] ? "{$pathinfo['dirname']}/{$pathinfo['filename']}" : '';
+				$path = $pathinfo['dirname'] ? "{$pathinfo['dirname']}/{$pathinfo['filename']}" : $pathinfo['filename'];
 				$path   = str_replace(array('//'), '', $path);
 				$params = explode("/", trim($path, '/'));
 
@@ -84,7 +84,6 @@ class App {
 					}
 					$controller_pos++;
 				}
-				print_r($params);
 				//子目录
 				$sub_dir = call_user_func_array('Helper::dir', array_slice($params, 0, $controller_pos));
 
