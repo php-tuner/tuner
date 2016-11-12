@@ -3,19 +3,10 @@
 // Use of this source code is governed by a GPL-3.0
 // license that can be found in the LICENSE file.
 
-class TunerController extends Controller {
-
-	public function index() {
-		print_r($this->req->post());
-		echo 'hi';
-	}
-
-	private function println($str) {
-		echo "$str" . PHP_EOL;
-	}
+class ProjectController extends CliController {
 
 	// 创建一个新项目
-	public function project() {
+	public function new() {
 		try {
 			$old_cwd = getcwd();
 			$init_file_path = Helper::dir(APP_ROOT_DIR, 'init.php');

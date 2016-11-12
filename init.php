@@ -6,7 +6,7 @@
 // 框架初始化（但是并未开始运行）
 
 // 应用程序的根目录
-defined('APP_ROOT_DIR') || define('APP_ROOT_DIR', dirname($_SERVER['SCRIPT_FILENAME']));
+defined('APP_ROOT_DIR') || define('APP_ROOT_DIR', dirname(realpath($_SERVER['SCRIPT_FILENAME'])));
 
 // 应用程序类库目录
 defined('APP_LIB_DIR') || define('APP_LIB_DIR', APP_ROOT_DIR . DIRECTORY_SEPARATOR . 'lib');
