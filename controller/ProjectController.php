@@ -3,7 +3,11 @@
 // Use of this source code is governed by a GPL-3.0
 // license that can be found in the LICENSE file.
 
-class ProjectController extends CliController {
+class ProjectController extends CLIController {
+	// 打印信息
+	private function println($str){
+		echo $str.PHP_EOL;
+	}
 
 	// 创建一个新项目
 	public function new() {
@@ -14,7 +18,7 @@ class ProjectController extends CliController {
 			$path = trim($this->req->post('path'));
 			// 创建项目所需目录
 			if (!file_exists($path)) {
-				if (mkdir($path, 0777, true)) {
+				if (!mkdir($path, 0777, true)) {
 					throw new Exception("create path($path) failed.");
 				}
 				$this->println("create path($path)");

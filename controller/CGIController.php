@@ -3,14 +3,14 @@
 // Use of this source code is governed by a GPL-3.0
 // license that can be found in the LICENSE file.
 
-class CliController extends Controller {
+// 限制控制器仅能在CGI模式下运行
+class CGIController extends Controller {
 	
 	public function __construct($req, $res, $cfg){
 		parent::__construct($req, $res, $cfg);
-		// 限制仅能在框架根目录访问
-		if(APP_ROOT_DIR != __ROOT__){
-			echo "APP_ROOT_DIR:".APP_ROOT_DIR.", __ROOT__:".__ROOT__.PHP_EOL;
-			throw new Exception("access deny!");
+		// 限制仅能在CLI模式下运行
+		if(php_sapi_name() !== 'cgi'){
+			exit('must run in cgi mode.');
 		}
 	}
 }
