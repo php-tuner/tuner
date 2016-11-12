@@ -188,8 +188,10 @@ class Response {
 
 	//输出内容
 	private function _output($str, $halt = true) {
-		foreach ($this->header as $header) {
-			header($header, true);
+		if (RUN_MODEL == 'CGI') {
+			foreach ($this->header as $header) {
+				header($header, true);
+			}
 		}
 		echo $str;
 		$halt && exit(0);
