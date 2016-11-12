@@ -9,8 +9,8 @@ class CLIController extends Controller {
 	public function __construct($req, $res, $cfg){
 		parent::__construct($req, $res, $cfg);
 		// 限制仅能在CLI模式下运行
-		if(php_sapi_name() !== 'cli'){
-			$res->notFound();// 404 for cgi
+		if(RUN_MODEL !== 'CLI'){
+			$res->notFound();// 404 for CGI
 		}
 	}
 }

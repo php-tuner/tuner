@@ -5,6 +5,9 @@
 
 // 框架初始化（但是并未开始运行）
 
+// 运行模式
+define('RUN_MODEL', isset($_SERVER['argc']) ? 'CLI' : 'CGI');
+
 // 应用程序的根目录
 defined('APP_ROOT_DIR') || define('APP_ROOT_DIR', dirname(realpath($_SERVER['SCRIPT_FILENAME'])));
 

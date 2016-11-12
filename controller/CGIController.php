@@ -9,8 +9,8 @@ class CGIController extends Controller {
 	public function __construct($req, $res, $cfg){
 		parent::__construct($req, $res, $cfg);
 		// 限制仅能在CLI模式下运行
-		if(php_sapi_name() !== 'cgi'){
-			exit('must run in cgi mode.');
+		if(RUN_MODEL !== 'CGI'){
+			exit('must run in CGI mode.');
 		}
 	}
 }

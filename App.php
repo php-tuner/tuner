@@ -19,16 +19,16 @@ class App {
 
 	// must run in cgi mode
 	public static function runGGI($is_debug = false){
-		if(php_sapi_name() !== 'cgi'){
-			exit('must run in cgi mode');
+		if(RUN_MODEL !== 'CGI'){
+			exit('must run in CGI mode');
 		}
 		self::run($is_debug);
 	}
 	
 	// must run in cli mode
 	public static function runCLI($is_debug = false){
-		if(php_sapi_name() !== 'cli'){
-			exit('must run in cli mode');
+		if(RUN_MODEL !== 'CLI'){
+			exit('must run in CLI mode');
 		}
 		self::run($is_debug);
 	}
