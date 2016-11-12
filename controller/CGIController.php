@@ -10,7 +10,7 @@ class CGIController extends Controller {
 		parent::__construct($req, $res, $cfg);
 		// 限制仅能在CLI模式下运行
 		if(RUN_MODEL !== 'CGI'){
-			exit('must run in CGI mode.');
+			exit('must run in CGI mode.'.PHP_EOL);
 		}
 	}
 }
