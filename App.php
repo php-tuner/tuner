@@ -39,7 +39,7 @@ class App {
 		$app = new self($is_debug);
 		if (php_sapi_name() === 'cli') {
 			// use $_SERVER['argv'] instead of $argv(not available)
-			$req = new RequestCli();
+			$req = new RequestCLI();
 		} else {
 			$req = new Request();
 		}
@@ -84,6 +84,7 @@ class App {
 					}
 					$controller_pos++;
 				}
+				print_r($params);
 				//子目录
 				$sub_dir = call_user_func_array('Helper::dir', array_slice($params, 0, $controller_pos));
 
