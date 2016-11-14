@@ -105,7 +105,7 @@ class App {
 				//寻找控制器方法
 				if(isset($params[$controller_pos + 1])){
 					$action = $params[$controller_pos + 1];
-					if(!preg_match('/^([a-zA-Z_\-]+)$/i', $action)){
+					if(!preg_match('/^([a-zA-Z_\-0-9]+)$/i', $action)){
 						throw new Exception("action is illegal", 500);
 					}
 					$action_args = array_slice($params, $i + 2);
