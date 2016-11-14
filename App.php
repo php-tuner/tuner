@@ -87,7 +87,7 @@ class App {
 				//子目录
 				$sub_dir = call_user_func_array('Helper::dir', array_slice($params, 0, $controller_pos));
 
-				$controller = isset($params[$controller_pos]) && preg_match('/^[a-zA-Z]+/i', $params[$controller_pos]) ? $params[$controller_pos] : Config::common('defaultController');
+				$controller = isset($params[$controller_pos]) && preg_match('/^([a-zA-Z_\-0-9]+)$/i', $params[$controller_pos]) ? $params[$controller_pos] : Config::common('defaultController');
 				$controller = str_replace(' ', '', ucwords(str_replace(CAMEL_CLASS_SEP, ' ', $controller)));
 				$class      = ucwords($controller) . "Controller";
 				//controller优先查找当前目录
