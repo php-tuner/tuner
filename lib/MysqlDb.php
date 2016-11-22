@@ -10,6 +10,7 @@ class MysqlDb {
 
 	private $master_link = null;
 	private $slave_link  = null;
+	private $last_link = null;
 
 	private static $links = array();
 
@@ -92,7 +93,12 @@ class MysqlDb {
 		}
 		return self::$links[$link_key] = $link;
 	}
-
+	
+	//返回最近使用的链接
+	public function lastLink() {
+		return current($this->lastLink);
+	}
+	
 	//切换主从
 	public function changeLinkType($type) {
 		if (!in_array($type, array('slave', 'master'))) {
@@ -116,7 +122,7 @@ class MysqlDb {
 		if (!$link_type) {
 			$link_type = $is_select ? 'slave' : 'master';
 		}
-		$link = $this->getRawLink($link_type, $force_new);
+		$link = $this->lastLink = $this->getRawLink($link_type, $force_new);
 		//Log::debug($link);
 		$start_time = microtime(true);
 		if($params){
