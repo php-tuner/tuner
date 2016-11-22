@@ -198,7 +198,7 @@ class Model {
 		$set_str         = $this->getSetStr($sets);
 		$sql             = "INSERT INTO `$table` $set_str";
 		$re              = $this->query($sql);
-		return $re;
+		return $this->lastLink()->lastInsertId();
 	}
 
 	// 更新单条记录
@@ -209,7 +209,7 @@ class Model {
 		$where_str       = $this->getWhereStr($wheres);
 		$sql             = "UPDATE `$table` $set_str $where_str LIMIT 1";
 		$re              = $this->query($sql);
-		return $re;
+		return $re ? $re->rowCount() : false;
 	}
 
 	// 更新多条记录
@@ -220,7 +220,7 @@ class Model {
 		$where_str       = $this->getWhereStr($wheres);
 		$sql             = "UPDATE `$table` $set_str $where_str";
 		$re              = $this->query($sql);
-		return $re;
+		return $re ? $re->rowCount() : false;
 	}
 
 	// 删除多条记录
@@ -230,7 +230,7 @@ class Model {
 		$where_str       = $this->getWhereStr($wheres);
 		$sql             = "DELETE FROM  `$table` $where_str";
 		$re              = $this->query($sql);
-		return $re;
+		return $re ? $re->rowCount() : false;
 	}
 
 	// 删除单条记录
@@ -240,7 +240,7 @@ class Model {
 		$where_str       = $this->getWhereStr($wheres);
 		$sql             = "DELETE FROM `$table` $where_str LIMIT 1";
 		$re              = $this->query($sql);
-		return $re;
+		return $re ? $re->rowCount() : false;
 	}
 
 	public function getValues($rows, $fields = array()) {
