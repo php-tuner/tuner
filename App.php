@@ -110,7 +110,7 @@ class App {
 					}
 					$action_args = array_slice($params, $i + 2);
 				}else{//目录请求
-					$action = $c->default_action ? $c->default_action : Config::common('defaultAction');
+					$action = Config::common('defaultAction');
 					$action_args = array_slice($params, $i + 1);
 				}
 				//分隔符也许可以定制

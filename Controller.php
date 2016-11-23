@@ -13,7 +13,6 @@ class Controller {
 	protected $req         = null;
 	protected $res         = null;
 	protected $cfg         = array();
-	public $default_action = 'index';
 	//模版数据
 
 	public function __construct($req, $res, $cfg) {
@@ -24,7 +23,7 @@ class Controller {
 
 	//默认首页
 	public function index() {
-		$this->res->html("<h1>default action.</h1>");
+		$this->res->html("<h1>Not found default action(index).</h1>");
 	}
 
 	//call other controller action
