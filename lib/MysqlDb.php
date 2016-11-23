@@ -96,7 +96,7 @@ class MysqlDb {
 	
 	//返回最近使用的链接
 	public function lastLink() {
-		return current($this->lastLink);
+		return $this->lastLink;
 	}
 	
 	//切换主从
