@@ -125,6 +125,7 @@ class MysqlDb {
 		$link = $this->lastLink = $this->getRawLink($link_type, $force_new);
 		//Log::debug($link);
 		$start_time = microtime(true);
+		$error_info = array();
 		if($params){
 			$sth = $link->prepare($sql, $options);
 			if(!$sth->execute($params)){
