@@ -24,6 +24,30 @@ php /var/www/tuner/index.php project/new path=/var/www/htdocs/hello_world
 ├── public      // 开放资源目录
 └── index.php   // 入口文件
 ```
+
+3. 服务器配置
+
+nignx 服务器
+
+```nginx
+server {
+        server_name domain.tld;
+
+        root /var/www/htdocs/hello_world;
+        index index.html index.php;
+
+		// 实现单一入口访问
+        location / {
+                try_files $uri $uri/ /index.php;
+        }
+
+        location ~* \.php$ {
+                fastcgi_pass 127.0.0.1:9000;
+                include fastcgi.conf;
+        }
+}
+```
+
 ##教程
 
 ###路由器
