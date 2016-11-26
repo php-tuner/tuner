@@ -280,6 +280,9 @@ class Request {
 			return false;
 		}
 		foreach($compare_keys[$strict_level] as $key){
+			if(!isset($url_info1[$key]) || !isset($url_info2[$key])){
+				return false;
+			}
 			if($url_info1[$key] != $url_info2[$key]){
 				return false;
 			}
