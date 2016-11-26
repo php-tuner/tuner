@@ -252,7 +252,7 @@ class Request {
 	}
 
 	// 判断url是不是当前请求
-	public function canFrom($url, $strict_level = 1){
+	public function from($url, $strict_level = 1){
 		$url = trim($url);
 		if(!$url){
 			return false;
@@ -267,10 +267,10 @@ class Request {
 				'path',
 			),
 			1 => array( // 正常模式
-				'host', 'port', 'path', 
+				'host', 'port', 'path',
 			),
 			2 => array( // 严谨模式
-				'host', 'port', 'path', 'query', 
+				'host', 'port', 'path', 'query',
 			),
 			3 => array( // 严格模式
 				'scheme', 'host', 'port', 'user', 'pass', 'path', 'query', 'fragment',
