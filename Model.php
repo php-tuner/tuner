@@ -12,9 +12,7 @@ class Model {
 
 	}
 
-	/**
-	 * 魔法__call
-	 */
+	// 魔法__call
 	public function __call($func, $args) {
 		if (!method_exists($this->db, $func)) {
 			$class_name = get_class($this);
@@ -23,6 +21,7 @@ class Model {
 		return call_user_func_array(array($this->db, $func), $args);
 	}
 
+	// 带缓存的 queryRow
 	public function queryCacheRow($sql, $cache_time = 300) {
 		$cache_key  = md5("queryCacheRow_{$sql}");
 		$cache_data = Cache::getData($cache_key);
@@ -34,6 +33,7 @@ class Model {
 		return $re;
 	}
 
+	// 带缓存的 queryRows
 	public function queryCacheRows($sql, $cache_time = 300) {
 		$cache_key  = md5("queryCacheRow_{$sql}");
 		$cache_data = Cache::getData($cache_key);
@@ -45,16 +45,19 @@ class Model {
 		return $re;
 	}
 
+	// 带缓存的 getRow
 	public function getCacheRow($where_array, $table = '', $cache_time = 300) {
 		$sql = $this->buildSql($where_array, $table);
 		return $this->queryCacheRow($sql, $cache_time);
 	}
 
+	// 带缓存的 getRows
 	public function getCacheRows($where_array, $table = '', $cache_time = 300) {
 		$sql = $this->buildSql($where_array, $table);
 		return $this->queryCacheRows($sql, $cache_time);
 	}
-
+	
+	// 构建 SQL 语句
 	protected function buildSql($where_array, $table = '') {
 		$table || $table = $this->table;
 		$table           = $this->escape($table);
@@ -63,6 +66,7 @@ class Model {
 		return $sql;
 	}
 
+	// 构建 count SQL 语句
 	protected function buildCountSql($where_array, $table = '') {
 		$table || $table = $this->table;
 		$table           = $this->escape($table);
@@ -84,7 +88,7 @@ class Model {
 		return $this->queryRows($sql);
 	}
 
-	//分页获取
+	// 分页获取
 	public function getPageRows($where_array, $order = '', $limit = '', $table = '') {
 		$sql       = $this->buildSql($where_array, $table);
 		$count_sql = $this->buildCountSql($where_array, $table);
@@ -112,6 +116,7 @@ class Model {
 		return str_replace($search, $replace, $v);
 	}
 
+	// 构建 where 字串
 	public function getWhereStr($where_array) {
 		$str = $this->buildCondStr($where_array);
 		return $str ? " WHERE $str " : $str;
@@ -243,6 +248,7 @@ class Model {
 		return $re ? $re->rowCount() : false;
 	}
 
+	// 获取多条记录中制定字段的结果
 	public function getValues($rows, $fields = array()) {
 		if (!is_array($fields)) {
 			$fields = array($fields);
@@ -259,6 +265,7 @@ class Model {
 		return count($re) > 1 ? $re : current($re);
 	}
 
+	// 格式化多条记录为以指定字段为 key 的形式
 	public function formatRows($rows, $field) {
 		if (!is_array($rows)) {
 			return $rows;
