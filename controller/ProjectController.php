@@ -39,9 +39,10 @@ TPL;
 			// 创建子目录
 			foreach (array(
 				'controller', // 控制器目录
-				'model', // 模型目录
-				'view', // 模版目录
-				'config', // 配置目录
+				'model',      // 模型目录
+				'view',       // 模版目录
+				'config',     // 配置目录
+				'public',     // 开放资源目录
 			) as $sub_dir) {
 				if (file_exists($sub_dir)) {
 					continue;
