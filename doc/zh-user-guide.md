@@ -19,10 +19,10 @@ php /var/www/tuner/index.php project/new path=/var/www/htdocs/hello_world
 ```
 ├── config      // 配置文件目录
 ├── controller  // 前端控制器目录
-├── index.php   // 入口文件
 ├── model       // 数据模型目录
+├── view        // 模版视图目录
 ├── public      // 开放资源目录
-└── view        // 模版视图目录
+└── index.php   // 入口文件
 ```
 ##教程
 
