@@ -6,9 +6,9 @@ Tunner是一套易用的应用程序开发框架，目的是帮助PHP开发者�
 ##安装及运行
 假设网站的根目录是 /var/www，我们将会创建一个 /varw/www/htdocs/hello_world的示例项目。
 
-1. 下载安装包解压到 /var/www/tuner 目录。
+* 下载安装包解压到 /var/www/tuner 目录。
 
-2. 执行如下命令 
+* 执行如下命令 
 
 ```bash  
 php /var/www/tuner/index.php project/new path=/var/www/htdocs/hello_world
@@ -25,7 +25,7 @@ php /var/www/tuner/index.php project/new path=/var/www/htdocs/hello_world
 └── index.php   // 入口文件
 ```
 
-3. 服务器配置
+* 服务器配置
 
 nignx 服务器
 
@@ -36,7 +36,7 @@ server {
         root /var/www/htdocs/hello_world;
         index index.html index.php;
 
-		// 实现单一入口访问
+		# 实现单一入口访问
         location / {
                 try_files $uri $uri/ /index.php;
         }
