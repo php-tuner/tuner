@@ -251,4 +251,40 @@ class Request {
 		return null;
 	}
 
+	// 判断url是不是当前请求
+	public function canFrom($url, $strict_level = 1){
+		$url = trim($url);
+		if(!$url){
+			return false;
+		}
+		$url_info2 = parse_url($url);
+		if(!is_array($url_info2)){
+			return false;
+		}
+		$url_info1 = parse_url($this->getCurrentUrl());
+		$compare_keys = array(
+			0 => array( // 松散模式
+				'path',
+			),
+			1 => array( // 正常模式
+				'host', 'port', 'path', 
+			),
+			2 => array( // 严谨模式
+				'host', 'port', 'path', 'query', 
+			),
+			3 => array( // 严格模式
+				'scheme', 'host', 'port', 'user', 'pass', 'path', 'query', 'fragment',
+			),
+		);
+		if(!isset($compare_keys[$strict_level])){
+			return false;
+		}
+		foreach($compare_keys[$strict_level] as $key){
+			if($url_info1[$key] != $url_info2[$key]){
+				return false;
+			}
+		}
+		return true;
+	}
+
 }
