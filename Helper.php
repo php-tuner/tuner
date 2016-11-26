@@ -6,7 +6,7 @@
 // 常用方法封装
 class Helper {
 
-        // 此函数来自Discuz源码
+    // 此函数来自Discuz源码
 	// $string： 明文 或 密文
 	// $operation：DECODE表示解密,其它表示加密
 	// $key： 密匙
@@ -70,16 +70,6 @@ class Helper {
 			// 因为加密后的密文可能是一些特殊字符，复制过程可能会丢失，所以用base64编码
 			return $keyc . str_replace('=', '', base64_encode($result));
 		}
-	}
-
-	public static function getMemInfo() {
-		$data    = explode("\n", file_get_contents("/proc/meminfo"));
-		$meminfo = array();
-		foreach ($data as $line) {
-			list($key, $val) = explode(":", $line);
-			$meminfo[$key]   = trim($val);
-		}
-		return $meminfo;
 	}
 
 	// 创建兼容平台的目录结构
