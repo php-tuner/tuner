@@ -10,7 +10,7 @@ class Log {
 		self::$is_debug = $debug;
 	}
 
-	//记录调试信息
+	// 记录调试信息
 	public static function debug() {
 		$vars = func_get_args();
 		foreach ($vars as $var) {
@@ -18,7 +18,7 @@ class Log {
 		}
 	}
 
-	//获取变量的字符串表示
+	// 获取变量的字符串表示
 	public static function getVarString($var) {
 		switch (true) {
 		case is_object($var) && method_exists($var, '__toString'):
@@ -31,10 +31,9 @@ class Log {
 		return $data;
 	}
 
-	//输出
+	// 输出
 	public static function show() {
 		if (!static::$is_debug) {
-			//self::$data['debug'][] = "add data but not in debug mode";
 			return false;
 		}
 		echo "<pre>Log:\n";
@@ -44,9 +43,9 @@ class Log {
 		}
 	}
 
-	//日志写到文件中
+	// 日志写到文件中
 	public static function file($str, $dir = 'common', $rotate_type = 'day') {
-		//不是绝对目录,作为子目录处理
+		// 不是绝对目录,作为子目录处理
 		if (stripos($dir, '/') !== 0) {
 			$base_dir = Config::site('log_dir');
 			if (!$base_dir) {
@@ -54,18 +53,18 @@ class Log {
 			}
 			$dir = Helper::dir($base_dir, $dir);
 		}
-		//检查目录是否存在，若不存在则创建之
+		// 检查目录是否存在，若不存在则创建之
 		is_dir($dir) || mkdir($dir, 0755, true);
-		//滚动方式
+		// 滚动方式
 		switch ($rotate_type) {
 		case 'month':
 			$filename = "Ym";
 			break;
-		//按小时
+		// 按小时
 		case 'hour':
 			$filename = date('YmdH');
 			break;
-		//按天
+		// 按天
 		case 'day':
 			$filename = date("Ymd");
 			break;
@@ -73,10 +72,6 @@ class Log {
 		$filename .= ".txt";
 		$filepath = Helper::dir($dir, $filename);
 		$str      = trim(self::getVarString($str));
-		/*if (empty($str))
-			{
-				return false;
-		*/
 		$str = date("Y-m-d H:i:s\t") . $str . PHP_EOL;
 		file_put_contents($filepath, $str, FILE_APPEND);
 		return $str;
