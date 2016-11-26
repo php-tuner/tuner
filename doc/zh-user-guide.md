@@ -60,7 +60,7 @@ server {
 
 ###模版
 
-基于 [twig](http://twig.sensiolabs.org/) 末班引擎。
+基于 [twig](http://twig.sensiolabs.org) 模版引擎。
 
 ###配置
 
