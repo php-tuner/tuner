@@ -56,11 +56,7 @@ class Config {
 
 	//加载文件配置
 	public function __call($method, $args) {
-		$conf = self::load($method);
-		if (count($args) > 0 && is_string($args[0])) {
-			return $conf[$args[0]];
-		}
-		return $conf;
+		return self::__callStatic($method, $args);
 	}
 
 	//获取变量
