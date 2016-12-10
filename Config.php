@@ -45,14 +45,48 @@ class Config {
 		return $cfg;
 	}
 
-	//加载文件配置
+	// 更新运行时配置
+	public static function update($filename, $new_cfg){
+		$filename = trim($filename);
+		$cfg = self::load($filename);
+		switch (gettype($new_cfg)) {
+		case 'object':
+			$cfg = Helper::mergeObject($cfg, $new_cfg);
+			break;
+		case 'array':
+			$cfg = array_merge($cfg, $new_cfg);
+			break;
+		default:
+			$cfg = $new_cfg;
+		}
+		self::$cache[$filename] = $cfg;
+		return $cfg;
+	}
+
+	// 获取配置信息
 	public static function __callStatic($method, $args) {
 		$conf = self::load($method);
-		//Todo: 配置合并
-		if (count($args) > 0 && is_string($args[0])) {
-			return isset($conf[$args[0]]) ? $conf[$args[0]] : null;
+		if(count($args) == 0){
+			return $conf;
 		}
-		return $conf;
+		$result = array();
+		foreach($args as $arg) {
+			$val = null;
+			if(isset($conf[$arg])){
+				$val = $conf[$arg];
+			}elseif(strpos($cfg, '.') !== false){
+				$val = $conf;
+				foreach(explode('.', $cfg) as $key){
+					if(!isset($tmp[$key])){
+						$val = null;
+						break;
+					}
+					$val = $val[$key];
+				}
+			}
+			$result[$arg] = $val;
+		}
+		return $result;
 	}
 
 	//加载文件配置
