@@ -8,6 +8,8 @@ class Config {
 
 	// 模式
 	public static $mode = 'dev';
+	// 配置缓存数组
+	private static $cache = array();
 
 	// 初始化
 	public function __construct() {
@@ -15,9 +17,8 @@ class Config {
 	}
 
 	public static function load($filename, $ext = 'php') {
-		static $cache = array();
-		if (isset($cache[$filename])) {
-			return $cache[$filename];
+		if (isset(self::$cache[$filename])) {
+			return self::$cache[$filename];
 		}
 		$cfg = array();
 		foreach (array(__ROOT__ . '/config', APP_CONFIG_DIR, APP_CONFIG_DIR . '/' . self::$mode) as $dir) {
@@ -40,7 +41,7 @@ class Config {
 				}
 			}
 		}
-		$cache[$filename] = $cfg;
+		self::$cache[$filename] = $cfg;
 		return $cfg;
 	}
 
