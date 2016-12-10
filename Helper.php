@@ -6,6 +6,46 @@
 // 常用方法封装
 class Helper {
 
+	// 判断 URL 是否相同
+	public function sameURL($url1, $url2, $strict_level = 1){
+		$url1 = trim($url1);
+		$url2 = trim($url2);
+		if(!$url1 || !$url2){
+			return false;
+		}
+		$url_info1 = parse_url($url1);
+		$url_info2 = parse_url($url2);
+		if(!is_array($url_info2) || !is_array($url_info2)){
+			return false;
+		}
+		$compare_keys = array(
+			0 => array( // 松散模式
+				'path',
+			),
+			1 => array( // 正常模式
+				'host', 'port', 'path',
+			),
+			2 => array( // 严谨模式
+				'host', 'port', 'path', 'query',
+			),
+			3 => array( // 严格模式
+				'scheme', 'host', 'port', 'user', 'pass', 'path', 'query', 'fragment',
+			),
+		);
+		if(!isset($compare_keys[$strict_level])){
+			return false;
+		}
+		foreach($compare_keys[$strict_level] as $key){
+			if(!isset($url_info1[$key]) || !isset($url_info2[$key])){
+				return false;
+			}
+			if($url_info1[$key] != $url_info2[$key]){
+				return false;
+			}
+		}
+		return true;
+	}
+
     // 此函数来自Discuz源码
 	// $string： 明文 或 密文
 	// $operation：DECODE表示解密,其它表示加密
