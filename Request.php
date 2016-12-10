@@ -38,7 +38,7 @@ class Request {
 		$this->route_uri = isset($_SERVER['PATH_INFO']) ? $_SERVER['PATH_INFO'] : $this->uri;
 		// 将多个／替换成一个
 		$this->route_uri = preg_replace('#/{1,}#', '/', $this->route_uri);
-		$is_https       = isset($_SERVER['SERVER_PORT']) && $_SERVER['SERVER_PORT'] == '443';
+		$is_https       = self::isHttps();
 		$this->base_url  = $is_https ? "https" : 'http';
 		isset($this->header['Host']) && $this->base_url .= "://{$this->header['Host']}";
 		if ($this->route_uri) {
@@ -47,6 +47,18 @@ class Request {
 		} else {
 			$this->base_url .= $_SERVER['REQUEST_URI'];
 		}
+	}
+	
+	// 检测是否是https请求
+	public static function isHttps(){
+		if ( !empty($_SERVER['HTTPS']) && strtolower($_SERVER['HTTPS']) !== 'off') {
+			return true;
+		} elseif (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && strtolower($_SERVER['HTTP_X_FORWARDED_PROTO']) === 'https') {
+			return true;
+		} elseif ( !empty($_SERVER['HTTP_FRONT_END_HTTPS']) && strtolower($_SERVER['HTTP_FRONT_END_HTTPS']) !== 'off') {
+			return true;
+		}
+		return isset($_SERVER['SERVER_PORT']) && $_SERVER['SERVER_PORT'] == '443';
 	}
 
 	public static function __callStatic($method, $args) {
