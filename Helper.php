@@ -6,6 +6,23 @@
 // 常用方法封装
 class Helper {
 
+	//获取数组的值避免warning
+	public function arrayGet($key_map, $array, $default_val = null){
+		if(!is_string($key_map)){
+			throw new Exception("key_map must be array");
+		}
+		if(!is_array($array)){
+			throw new Exception("array param must be array type");
+		}
+		foreach(explode('.', $key_map) as $key){
+			if(!array_key_exists($key, $array)){
+				return $default_val;
+			}
+			$array = $array[$key];
+		}
+		return $array;
+	}
+
 	// 判断 URL 是否相同
 	public function sameURL($url1, $url2, $strict_level = 1){
 		$url1 = trim($url1);
