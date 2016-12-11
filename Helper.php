@@ -7,7 +7,7 @@
 class Helper {
 
 	//获取数组的值避免warning
-	public function arrayGet($key_map, $array, $default_val = null){
+	public static function arrayGet($key_map, $array, $default_val = null){
 		if(!is_string($key_map)){
 			throw new Exception("key_map must be array");
 		}
@@ -15,7 +15,7 @@ class Helper {
 			throw new Exception("array param must be array type");
 		}
 		foreach(explode('.', $key_map) as $key){
-			if(!array_key_exists($key, $array)){
+			if(!is_array($array) || !array_key_exists($key, $array)){
 				return $default_val;
 			}
 			$array = $array[$key];
