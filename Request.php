@@ -159,11 +159,14 @@ class Request {
 	}
 
 	//获取当前URL
-	public function getCurrentUrl($host = true) {
-		if ($host) {
-			return "http://{$this->header['Host']}{$this->uri}";
+	public function getCurrentUrl($with_host = true) {
+		$uri = $this->uri;
+		$host = self::getHeader('Host');
+		$scheme = self::isHttps() ? 'https' : 'http';
+		if ($with_host) {
+			return "{$scheme}://{$host}{$uri}";
 		} else {
-			return $this->uri;
+			return $uri;
 		}
 	}
 
@@ -213,18 +216,18 @@ class Request {
 	}
 
 	// 获取输出格式
-	private function getFormat() {
+	private static function getFormat() {
 		//force_format
-		$format = $this->get('_format');
+		$format = self::get('_format');
 		if (!$format) {
-			$path   = parse_url($this->uri, PHP_URL_PATH);
+			$path   = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 			$format = pathinfo($path, PATHINFO_EXTENSION);
 		}
 		return $format ? strtolower($format) : 'html';
 	}
 
 	//获取Get数据
-	public function get($key = null) {
+	public static function get($key = null) {
 		if (empty($key)) {
 			return $_GET;
 		}
@@ -232,8 +235,8 @@ class Request {
 	}
 
 	//获取POST数据
-	public function post($key = null, $check_method = true) {
-		if ($check_method && $this->method != 'POST') {
+	public static function post($key = null, $check_method = true) {
+		if ($check_method && $_SERVER['REQUEST_METHOD'] != 'POST') {
 			throw new Exception("非POST请求方法");
 		}
 		if (empty($key)) {
@@ -243,7 +246,7 @@ class Request {
 	}
 
 	//获取COOKIE数据
-	public function cookie($key = null) {
+	public static function cookie($key = null) {
 		if (empty($key)) {
 			return $_COOKIE;
 		}
@@ -251,7 +254,7 @@ class Request {
 	}
 
 	//按$_GET, $_POST, $_COOKIE 顺序获取值
-	public function gpc($key = null) {
+	public static function gpc($key = null) {
 		if (empty($key)) {
 			return $_REQUEST;
 		}
