@@ -8,6 +8,7 @@ class Response {
 	public $charset = 'UTF-8';
 	public $twig    = null;
 	private $header = array();
+	private $cache_info = array();
 
 	public static function __callStatic($method, $args) {
 		static $obj = null;
@@ -70,6 +71,45 @@ class Response {
 		// Log::file("$url", 'redirect');
 		header("Location: $url", true, $code);
 		$halt && exit(0);
+	}
+
+	// 缓存处理
+	public function cache($params = null, $lifetime = 300, &$cache_key = array()) {
+		$cache_key = "_response_cache_".md5(json_encode($params));
+		$data = Cache::getData($cache_key);
+		// 获取缓存(包括header?)
+		if($data){
+			$etag = $data['etag'];
+			switch(true){
+				case isset($_SERVER['HTTP_IF_NONE_MATCH']) && $_SERVER['HTTP_IF_NONE_MATCH'] == "\"$etag\"":
+					header("304 Not Modified", true, 304);
+				break;
+				default:
+					$this->cache_info = array();
+					Log::debug('from cache');
+					if(isset($data['header']) && is_array($data['header'])){
+						foreach($data['header'] as $header){
+							header($header, true);
+						}
+					}
+					$this->setCacheHeader($lifetime, $etag);	
+					// will halt program
+					echo $data['raw_content'];
+			}	
+			exit(0);
+		}
+		// Log::debug($this->cache_info);
+		// go on
+		$this->cache_info['key'] = $cache_key;
+		$this->cache_info['lifetime'] = intval($lifetime);
+	}
+
+	// 设置缓存所需要的header头
+	private function setCacheHeader($lifetime, $etag){
+		// https://developers.google.cn/web/fundamentals/performance/optimizing-content-efficiency/http-caching?hl=zh-cn
+		header('Pragma: public', true);
+		header("Cache-Control: max-age=$lifetime", true);
+		header("ETag: \"$etag\"", true);
 	}
 
 	//自动识别输出格式
@@ -188,12 +228,22 @@ class Response {
 
 	//输出内容
 	private function _output($str, $halt = true) {
+		// 缓存
 		if (RUN_MODEL == 'CGI') {
 			foreach ($this->header as $header) {
 				header($header, true);
 			}
 		}
-		echo $str;
+		if($this->cache_info){
+			$etag = md5($str);
+			Cache::setData($this->cache_info['key'], array(
+				'header' => $this->header,
+				'raw_content' => $str,
+				'etag' => $etag,
+			), $this->cache_info['lifetime']);
+			$this->setCacheHeader($this->cache_info['lifetime'], $etag);
+		}
+		echo $str;	
 		$halt && exit(0);
 	}
 
