@@ -37,7 +37,7 @@ class App {
 	public static function run($is_debug = false) {
 		// 如果用cli方式运行(不去改变$_SERVER变量)
 		$app = new self($is_debug);
-		if (php_sapi_name() === 'cli') {
+		if (RUN_MODEL == 'CLI') {
 			// use $_SERVER['argv'] instead of $argv(not available)
 			$req = new RequestCLI();
 		} else {
