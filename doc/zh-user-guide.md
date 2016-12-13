@@ -63,7 +63,7 @@ RewriteRule ^(.*)$ index.php/$1 [L]
 cd /var/www/htdocs/hello_world
 php -S 127.0.0.1:8090
 ```
-然后在浏览器中打开 http://127.0.0.1:8090/index.php，注意此时是用pathinfo进行路由分发的。
+然后在浏览器中打开 http://127.0.0.1:8090/index.php ，注意此时是用pathinfo进行路由分发的。
 
 ##教程
 
