@@ -27,7 +27,7 @@ php /var/www/tuner/index.php project/new path=/var/www/htdocs/hello_world
 
 * 服务器配置
 
-nignx 服务器
+Nginx 服务器
 
 ```nginx
 server {
@@ -47,6 +47,23 @@ server {
         }
 }
 ```
+
+Apache 服务器主要配置
+
+```apache
+RewriteEngine On
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.*)$ index.php/$1 [L]
+```
+
+测试环境也可以直接用PHP内置服务器进行开发，只需要运行如下命令即可：
+ 
+```bash
+cd /var/www/htdocs/hello_world
+php -S 127.0.0.1:8090
+```
+然后在浏览器中打开 http://127.0.0.1:8090/index.php，注意此时是用pathinfo进行路由分发的。
 
 ##教程
 
