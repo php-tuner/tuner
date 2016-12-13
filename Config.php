@@ -86,7 +86,7 @@ class Config {
 			}
 			$result[$arg] = $val;
 		}
-		return $result;
+		return count($result) == 1 ? current($result) : $result;
 	}
 
 	//加载文件配置
