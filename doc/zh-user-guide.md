@@ -105,80 +105,69 @@ start('beijing', 'monday');
 
 #### 主要函数说明
 
-* getRow($where_array, $table = '')
+```php
+class Model {
+	
+	// 获取单条记录。
+	public function getRow($where_array, $table = '')
 
-获取单条记录。
+	// 获取多条记录。
+	public function getRows($where_array, $table = '')
 
-* getRows($where_array, $table = '')
+	// 更新一条记录。
+	public function updateOne($sets, $wheres, $table = '')
 
-获取多条记录。
+	
+	// 更新多条记录。
+	public function updateBatch($sets, $wheres, $table = '')
 
-* updateOne($sets, $wheres, $table = '')
+	// 插入一条数据。
+	public function insertOne($sets, $table = '')
 
-更新一条记录。
+	// 删除一条记录。
+	public function deleteOne($wheres, $table = '')
 
-* updateBatch($sets, $wheres, $table = '')
+	// 删除多条记录。 
+	public function deleteBatch($wheres, $table = '')
 
-更新多条记录。
+	// 获取单条记录。
+	public function queryRow($sql)
 
-* insertOne($sets, $table = '')
+	// 获取多条记录。
+	public function queryRows($sql)
 
-插入一条数据。
+	// 获取查询中的第一个地段的值，通常用来获取数据库条数。
+	public function queryFirst($sql)
 
-* deleteOne($wheres, $table = '')
+	
+	// 执行一条SQL语句。
+	// $sql参数是执行的语句；$params 是传入的参数列表此时使用pdo绑定参数执行； $options是传入pdo 驱动的配置参数；
+	// $force_new 为真时会使用新创建的连接执行，否则使用连接池中的已有连接。
+	// 返回值是一个PDOStatement 对象。
+	// 关于PDO的更多内容请查看[官方文档](http://php.net/manual/zh/book.pdo.php)。
+	public function query($sql, $params = array(), $options = array(), $force_new = false)
 
-删除一条记录。
+	// 	获取数据库多条记录中某一列或几列的值列表。
+	public function getValues($rows, $fields)
 
-* deleteBatch($wheres, $table = '')
+	// 格式化数据库多条记录，以$field字段位key。
+	public function formatRows($rows, $field)
 
-删除多条记录。
+	// 过滤字符串，相当于内置的 mysql_real_escape_string 方法。
+	public function escape($v)
 
-* queryRow($sql)
+	// 开启事务。
+	public function begin()
 
-获取单条记录。
+	// 提交事务。
+	public function commit()
 
-* queryRows($sql)
+	// 回滚事务。
+	public function rollback()
 
-获取多条记录。
+}
 
-* queryFirst($sql)
-
-获取查询中的第一个地段的值，通常用来获取数据库条数。
-
-* query($sql, $params = array(), $options = array(), $force_new = false)
-
-执行一条SQL语句。
-
-$sql参数是执行的语句；$params 是传入的参数列表此时使用pdo绑定参数执行； $options是传入pdo 驱动的配置参数；
-$force_new 为真时会使用新创建的连接执行，否则使用连接池中的已有连接。
-
-返回值是一个PDOStatement 对象。
-
-关于PDO的更多内容请查看[官方文档](http://php.net/manual/zh/book.pdo.php)。
-
-* getValues($rows, $fields)
-
-获取数据库多条记录中某一列或几列的值列表。
-
-* formatRows($rows, $field)
-
-格式化数据库多条记录，以$field字段位key。
-
-* escape($v)
-
-过滤字符串，相当于内置的 mysql_real_escape_string 方法。
-
-* begin()
-
-开启事务。
-
-* commit()
-
-提交事务。
-
-* rollback()
-
-回滚事务。
+```
 
 上述所有函数中参数说明
 
@@ -235,7 +224,7 @@ class UserModel extends Model {
 
 #### 防止SQL 注入
 
-Model 中query开头的都是支持原生查询的，使用这类方法需要使用 escape 函数过滤响应的参数来
+Model 中query开头的都是支持原生查询的，使用这类方法需要使用 escape 函数过滤参数来
 放置SQL注入。
 
 ###模版
