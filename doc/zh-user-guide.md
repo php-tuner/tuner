@@ -75,21 +75,21 @@ php -S 127.0.0.1:8090
 
 * uri
 
-假设请求的链接是: http://tuner.expample.com/work/start.html?name=tuner，此请求的
+假设请求的链接是: http://tuner.expample.com/work/start.html?name=tuner ，此请求的
 被影射为控制器Work(对应文件controller/WorkController.php)的start方法请求。
 uri 映射需要服务器做相关重写设置，请参照相关说明。
 
 * pathinfo
 
-假设请求的链接是: http://tuner.expample.com/index.php/work/start.html?name=tuner，此请求的
+假设请求的链接是: http://tuner.expample.com/index.php/work/start.html?name=tuner ，此请求的
 被影射为控制器Work(对应文件controller/WorkController.php)的start方法（必须是public）请求。
 此映射方法无需服务器做特殊设置。
 
 影射中的多余字串将会传递给对应控制器的调用方法中。
 
-例如请求http://tuner.expample.com/work/start/beijing/monday.html, 将按如下调用：
+例如请求 http://tuner.expample.com/work/start/beijing/monday.html , 将按如下调用：
 
-```
+```php
 //WorkController中的
 start('beijing', 'monday'); 
 ```
