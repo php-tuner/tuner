@@ -103,6 +103,141 @@ start('beijing', 'monday');
 
 数据模型主要用来封装对数据（主要是数据库）的相关操作。
 
+#### 主要函数说明
+
+* getRow($where_array, $table = '')
+
+获取单条记录。
+
+* getRows($where_array, $table = '')
+
+获取多条记录。
+
+* updateOne($sets, $wheres, $table = '')
+
+更新一条记录。
+
+* updateBatch($sets, $wheres, $table = '')
+
+更新多条记录。
+
+* insertOne($sets, $table = '')
+
+插入一条数据。
+
+* deleteOne($wheres, $table = '')
+
+删除一条记录。
+
+* deleteBatch($wheres, $table = '')
+
+删除多条记录。
+
+* queryRow($sql)
+
+获取单条记录。
+
+* queryRows($sql)
+
+获取多条记录。
+
+* queryFirst($sql)
+
+获取查询中的第一个地段的值，通常用来获取数据库条数。
+
+* query($sql, $params = array(), $options = array(), $force_new = false)
+
+执行一条SQL语句。
+
+$sql参数是执行的语句；$params 是传入的参数列表此时使用pdo绑定参数执行； $options是传入pdo 驱动的配置参数；
+$force_new 为真时会使用新创建的连接执行，否则使用连接池中的已有连接。
+
+返回值是一个PDOStatement 对象。
+
+关于PDO的更多内容请查看[官方文档](http://php.net/manual/zh/book.pdo.php)。
+
+* getValues($rows, $fields)
+
+获取数据库多条记录中某一列或几列的值列表。
+
+* formatRows($rows, $field)
+
+格式化数据库多条记录，以$field字段位key。
+
+* escape($v)
+
+过滤字符串，相当于内置的 mysql_real_escape_string 方法。
+
+* begin()
+
+开启事务。
+
+* commit()
+
+提交事务。
+
+* rollback()
+
+回滚事务。
+
+上述所有函数中参数说明
+
+* $where_array 
+
+条件数组。 
+
+```php
+//支持的条件表达方式
+$cond_array = array(
+        'status' => 1,
+        'id' => array(1, 2, 3),
+        'status' => array('!=' => 1),
+        'title' => array('like' => '%hello%'),
+);
+```
+
+* $sets 
+
+设置数组。key 是字段名，value 是对应字段值。
+
+* $table 是数据库表名。
+
+为空时使用模型默认的数据表名($model->table)。
+
+定义自己的数据库模型
+
+```php
+class UserModel extends Model {
+	
+	public function __construct(){
+		//配置数组
+		$cfg = array(
+			'master' => array(
+				'host' => 'localhost',
+				'user' => 'root',
+				'password' => '221.179.190.191',
+			),
+			'slave' => array(
+				'host' => 'localhost',
+				'user' => 'root',
+				'password' => '221.179.190.191',
+			),
+		);
+		// tuner 是数据库名称
+		$this->db = Db::mysql($cfg, 'tuner');
+		// 默认表名
+		$this->table = 'user';
+		parent::__construct();
+	}
+}
+
+``` 
+
+#### 防止SQL 注入
+
+Model 中query开头的都是支持原生查询的，使用这类方法需要使用 escape 函数过滤响应的参数来
+放置SQL注入。
+
 ###模版
 
 基于 [twig](http://twig.sensiolabs.org) 模版引擎。
