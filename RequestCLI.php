@@ -4,7 +4,7 @@
 // license that can be found in the LICENSE file.
 
 // CLI 请求
-class RequestCLI extends Request {
+class RequestCLI {
 
 	private $fake_get  = array();
 	private $fake_post = array();
