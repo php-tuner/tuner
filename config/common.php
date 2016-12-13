@@ -5,7 +5,7 @@
 
 return array(
 	//默认控制器
-	'defaultController' => 'default',
+	'defaultController' => 'index',
 	//默认控制器行为
 	'defaultAction'     => 'index',
 	//缓存处理器，支持memcached, memcache, auto
