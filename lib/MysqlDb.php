@@ -114,34 +114,41 @@ class MysqlDb {
 
 	//执行SQL
 	public function query($sql, $params = array(), $options = array(), $force_new = false) {
-		$sql = trim($sql);
-		//preg_match('/^\s*"?(SET|INSERT|UPDATE|DELETE|REPLACE|CREATE|DROP|TRUNCATE|LOAD|COPY|ALTER|RENAME|GRANT|REVOKE|LOCK|UNLOCK|REINDEX)\s/i', $sql);
-		$is_select = preg_match('/^SELECT\s+/i', $sql);
-		//非事务状态下自动切换主从
-		$link_type = $this->link_type;
-		if (!$link_type) {
-			$link_type = $is_select ? 'slave' : 'master';
-		}
-		$link = $this->lastLink = $this->getRawLink($link_type, $force_new);
-		//Log::debug($link);
-		$start_time = microtime(true);
-		$error_info = array();
-		if($params){
-			$sth = $link->prepare($sql, $options);
-			if(!$sth->execute($params)){
-				$error_info = $sth->errorInfo();
-				$sth = false;
+		try{
+			$sql = trim($sql);
+			//preg_match('/^\s*"?(SET|INSERT|UPDATE|DELETE|REPLACE|CREATE|DROP|TRUNCATE|LOAD|COPY|ALTER|RENAME|GRANT|REVOKE|LOCK|UNLOCK|REINDEX)\s/i', $sql);
+			$is_select = preg_match('/^SELECT\s+/i', $sql);
+			//非事务状态下自动切换主从
+			$link_type = $this->link_type;
+			if (!$link_type) {
+				$link_type = $is_select ? 'slave' : 'master';
 			}
-		}else{
-			$sth = $link->query($sql);
-			if($sth === false){
-				$error_info = $link->errorInfo();
+			$link = $this->lastLink = $this->getRawLink($link_type, $force_new);
+			//Log::debug($link);
+			$start_time = microtime(true);
+			$error_info = array();
+			if($params){
+				$sth = $link->prepare($sql, $options);
+				if(!$sth->execute($params)){
+					$error_info = $sth->errorInfo();
+					$sth = false;
+				}
+			}else{
+				$sth = $link->query($sql);
+				if($sth === false){
+					$error_info = $link->errorInfo();
+				}
 			}
+			$used_time  = microtime(true) - $start_time;
+			Log::debug("sql: $sql, time: $used_time sec");
+		}catch(Exception $e){
+			$error_info = array(
+				$e->getCode(),
+				$e->getMessage(),
+			);
 		}
-		$used_time  = microtime(true) - $start_time;
-		Log::debug("sql: $sql, time: $used_time sec");
 		if ($error_info) {
-			$err_msg = "{$error_info[0]}:{$error_info[1]}:{$error_info[2]}\t sql:$sql";
+			$err_msg = "{$error_info[0]}\t{$error_info[1]}\t{$error_info[2]}\tsql:$sql";
 			Log::debug($err_msg);
 			//记录错误日志
 			$this->log($err_msg);
