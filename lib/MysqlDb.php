@@ -28,7 +28,7 @@ class MysqlDb {
 	}
 
 	//  获取 PDO 所有的属性
-	public function getAllAttributes($conn = NULL){
+	private function getAllAttributes($conn = NULL){
 		if(!$conn){
 			$conn = $this->last_link;
 		}
@@ -139,7 +139,12 @@ class MysqlDb {
 
 	//记录错误日志
 	private function log($log_str, $type = "error") {
-		Log::file("{$type}\t{$log_str}", "mysql");
+		$link = $this->last_link;
+		if($link){
+			$version_info = "server_version:".$link->getAttribute(PDO::ATTR_SERVER_VERSION);
+			$version_info .= "\tclient_version:".$link->getAttribute(PDO::ATTR_CLIENT_VERSION);
+		}
+		Log::file("{$type}\t{$log_str}\t$version_info", "mysql");
 	}
 
 	//执行SQL
@@ -176,7 +181,7 @@ class MysqlDb {
 			$error_info = $e->errorInfo;
 		}
 		if ($error_info) {
-			$err_msg = "sql:$sql\t".print_r($error_info, true);
+			$err_msg = "sql:$sql\terror_info:{$error_info[0]},{$error_info[1]},{$error_info[2]}";
 			Log::debug($err_msg);
 			//记录错误日志
 			$this->log($err_msg);
@@ -184,7 +189,7 @@ class MysqlDb {
 				'2006', //MySQL server has gone away
 				'2013', //Lost connection to MySQL server during query
 			)) && !$force_new) {
-				$this->log("reconnect" . print_r($link, true), "info");
+				$this->log("reconnect", "info");
 				return $this->query($sql, $params, $options, true);
 			} else {
 				//是否要抛出异常
