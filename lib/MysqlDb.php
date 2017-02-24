@@ -27,6 +27,36 @@ class MysqlDb {
 		return print_r($this, true);
 	}
 
+	//  获取 PDO 所有的属性
+	public function getAllAttributes($conn = NULL){
+		if(!$conn){
+			$conn = $this->last_link;
+		}
+		if(!($conn instanceof PDO)){
+			return array();
+		}
+		$attributes = array(
+		    "AUTOCOMMIT", 
+			"CASE", 
+			"CLIENT_VERSION", 
+			"CONNECTION_STATUS", // Oracle does not have the attributes
+			"DRIVER_NAME",
+			"ERRMODE", 
+		   //"ORACLE_NULLS", 
+			"PERSISTENT", 
+			//"PREFETCH", // Oracle  and MySQL does not have the attributes
+			"SERVER_INFO", 
+			"SERVER_VERSION",
+		    //"TIMEOUT" // Oracle  and MySQL does not have the attributes
+		);
+		$result = array();
+		foreach ($attributes as $attr) {
+			$attr_name = "PDO::ATTR_$attr";
+			$result[$attr_name] = defined($attr_name) ? $conn->getAttribute(constant($attr_name)) : null;
+		}
+		return $result;
+	}
+
 	//关闭连接
 	public function closeLinks($type = '') {
 		if ($type && isset(self::$links[$type])) {
