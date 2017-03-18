@@ -125,7 +125,7 @@ class MysqlDb {
 	}
 	
 	//返回最近使用的链接
-	public function last_link() {
+	public function lastLink() {
 		return $this->last_link;
 	}
 	
