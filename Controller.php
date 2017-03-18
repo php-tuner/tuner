@@ -26,6 +26,15 @@ class Controller {
 		$this->res->html("<h1>Not found default action(index).</h1>");
 	}
 
+	// 缓存响应
+	protected function cacheOutput($params = array(), $lifetime = 300){
+		$cache_key = "_response_output_cache_".parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+		if($params){
+			$cache_key .= md5(json_encode($params));
+		}
+		$this->res->cache($cache_key, $lifetime);
+	}
+
 	//call other controller action
 	public function callAction($action, $controller = null) {
 
