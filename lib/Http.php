@@ -373,6 +373,13 @@ class HttpResponse {
 	public $error  = null;
 
 	public function __construct($status, $header, $body, $error = null) {
+		$charset = '';
+		if(isset($header['Content-Type']) && preg_match('/charset=([^;]*)/i', $header['Content-Type'], $match)){
+			$charset = $match[1];
+		}
+		if($charset && strtoupper($charset) != 'UTF-8'){
+			$body = mb_convert_encoding($body, 'UTF-8', $charset);
+		}
 		$this->status = $status;
 		$this->header = $header;
 		$this->body   = $body;
