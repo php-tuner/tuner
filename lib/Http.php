@@ -51,12 +51,13 @@ class Http {
 			if (isset($h[1])) {
 				//record it
 				$key = self::canonicalHeaderKey($h[0]);
-				if (!isset($headers[$key])) {
+				if(isset($headers[$key])){
+					if(!is_array($headers[$key])){
+						$headers[$key] = array($headers[$key]);
+					}
+					$headers[$key] = array_merge($headers[$key], array(trim($h[1])));
+				}else{
 					$headers[$key] = trim($h[1]);
-				} elseif (is_array($headers[$h[0]])) {
-					$headers[$key] = array_merge($headers[$key], array(trim($h[1]))); // [+]
-				} else {
-					$headers[$key] = array_merge(array($headers[$key]), array(trim($h[1])));
 				}
 			} else {
 				if (substr($h[0], 0, 1) == "\t") {
@@ -341,12 +342,12 @@ class Http {
 					$rtn = new HttpResponse('', '', $body, new Exception("url:{$info['url']}, error:$error, info:" . print_r($info, true)));
 					//throw new Exception($error);
 				} else {
-					$header_lines = substr($result, 0, $info['header_size']);
+					list($http_line, $header_lines) = explode("\n", substr($result, 0, $info['header_size']), 2);
 					$http_status  = array();
 					$headers      = self::parseHeaders($header_lines);
-					//it must have set key 0
-					list($http_status['version'], $http_status['code'], $http_status['desc']) = explode(' ', $headers[0]);
-					$rtn                                                                      = new HttpResponse($http_status, $headers, $body); //compact('info', 'error', 'result');
+					list($http_status['version'], $http_status['code'], $http_status['desc']) = explode(' ', trim($http_line));
+					// compact('info', 'error', 'result');
+					$rtn = new HttpResponse($http_status, $headers, $body);
 				}
 				if (is_callable($callback)) {
 					$callback($rtn);
