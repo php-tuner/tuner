@@ -375,8 +375,11 @@ class HttpResponse {
 
 	public function __construct($status, $header, $body, $error = null) {
 		$charset = '';
-		if(isset($header['Content-Type']) && preg_match('/charset=([^;]*)/i', $header['Content-Type'], $match)){
-			$charset = $match[1];
+		if(isset($header['Content-Type'])){
+			$content_type = is_array($header['Content-Type']) ? end($header['Content-Type']) : $header['Content-Type'];
+			if(preg_match('/charset=([^;]*)/i', $content_type, $match)){
+				$charset = $match[1];
+			}
 		}
 		if($charset && strtoupper($charset) != 'UTF-8'){
 			$body = mb_convert_encoding($body, 'UTF-8', $charset);
