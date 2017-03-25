@@ -364,6 +364,28 @@ class Http {
 		curl_multi_close($chs);
 		return $response;
 	}
+	
+	// 解析 conent_type header val
+	public static function parseContentType($content_type) {
+		$info = array(
+			'mine_type' => '',
+		);
+		foreach(explode(';', $content_type) as $v){
+			switch(true){
+				case stripos($v, '=') > 0:
+					$va = explode('=', $v, 2);
+					$info[trim($va[0])] = trim($va[1]);
+				break;
+				case preg_match('#.*/.*#i', $v, $match):
+					$info['mine_type'] = trim($v);
+				break;
+				default:
+					// dirty val
+					$info[] = $v;
+			}
+		}
+		return $info;
+	}
 }
 
 class HttpResponse {
@@ -376,6 +398,7 @@ class HttpResponse {
 	public function __construct($status, $header, $body, $error = null) {
 		$charset = '';
 		if(isset($header['Content-Type'])){
+			// Todo: use $this->getHeader ?
 			$content_type = is_array($header['Content-Type']) ? end($header['Content-Type']) : $header['Content-Type'];
 			if(preg_match('/charset=([^;]*)/i', $content_type, $match)){
 				$charset = $match[1];
@@ -393,6 +416,20 @@ class HttpResponse {
 		}
 	}
 
+	// 获取 header 信息
+	public function getHeader($key, $single = true){
+		$key = Http::canonicalHeaderKey($key);
+		if(!isset($this->header[$key])){
+			return '';
+		}
+		$val = $this->header[$key];
+		if(is_array($val) && $single){
+			return end($val);
+		}
+		return $val;
+	}
+
+	// 获取错误信息
 	public function error() {
 		if (get_class($this->error) == 'Exception') {
 			return $this->error->getMessage();
@@ -401,10 +438,12 @@ class HttpResponse {
 		return @strval($this->error);
 	}
 
+	// 将返回内容解析为 json 数组
 	public function json() {
 		return json_decode($this->body, true);
 	}
-
+	
+	// 获取原始返回内容
 	public function raw() {
 		return $this->body;
 	}
