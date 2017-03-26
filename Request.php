@@ -36,7 +36,7 @@ class Request {
 		$this->is_ajax   = static::isAjax();
 		$this->route_uri = $this->uri;
 		// 使用 PATH_INFO 路由
-		if($this->route_uri = '/index.php' && isset($_SERVER['PATH_INFO']) && $_SERVER['PATH_INFO']){
+		if($this->route_uri == '/index.php' && isset($_SERVER['PATH_INFO']) && $_SERVER['PATH_INFO']){
 			$this->route_uri = $_SERVER['PATH_INFO'];
 		}
 		// 将多个／替换成一个
