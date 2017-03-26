@@ -24,7 +24,7 @@ class Config {
 		$cfg = array();
 		$cfg_dirs = array(__ROOT__ . '/config', APP_CONFIG_DIR);
 		if(TUNER_MODE){
-			$cfg_dirs[] = APP_CONFIG_DIR . '/' . self::$mode;
+			$cfg_dirs[] = APP_CONFIG_DIR . '/' . TUNER_MODE;
 		}
 		foreach ($cfg_dirs as $dir) {
 			$filepath = "$dir/{$filename}.$ext";
