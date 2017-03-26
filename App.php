@@ -8,7 +8,12 @@
 class App {
 
 	// 初始化
-	public function __construct($is_debug = false) {
+	public function __construct($opt = array()) {
+		if (is_array($opt)) {
+			$is_debug = isset($opt['debug']) ? $opt['debug'] : false;
+		}else{
+			$is_debug = $opt; // Todo: remove it in the future.
+		}
 		// 初始化开始
 		Log::init($is_debug);
 		if ($is_debug && Config::$mode == 'dev') {
@@ -90,16 +95,25 @@ class App {
 				$controller = isset($params[$controller_pos]) && preg_match('/^([a-zA-Z_\-0-9]+)$/i', $params[$controller_pos]) ? $params[$controller_pos] : Config::common('defaultController');
 				$controller = str_replace(' ', '', ucwords(str_replace(CAMEL_CLASS_SEP, ' ', $controller)));
 				$class      = ucwords($controller) . "Controller";
-				//controller优先查找当前目录
-				spl_autoload_register(_createLoader_(
-					$controller_dir,
-					Helper::dir(APP_ROOT_DIR, $sub_dir, 'model'),
-					Helper::dir(APP_ROOT_DIR, $sub_dir, 'lib')
-				), true, true);
-
+				
+				// 添加自动加载目录
+				$autoload_dir = array();
+				do{
+					$autoload_dir['controller'][] = Helper::dir(APP_ROOT_DIR, 'controller', $sub_dir);
+					$autoload_dir['model'][] = Helper::dir(APP_ROOT_DIR, 'model', $sub_dir);
+					$autoload_dir['final'][] = Helper::dir(APP_ROOT_DIR, 'lib', $sub_dir);
+					if(!$sub_dir){
+						break;
+					}
+					$index = strrpos($sub_dir, '/');
+					$sub_dir = $index === false ? '' : substr($sub_dir, 0, $index);
+				}while(true);
+				spl_autoload_register(_createLoader_($autoload_dir));
+				
 				if (!class_exists($class)) {
 					throw new Exception("not found(controller: $class)", 404);
 				}
+				Log::debug($class);
 				//实例化控制器
 				$c = new $class($req, $res, $cfg);
 				//寻找控制器方法

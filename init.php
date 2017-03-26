@@ -5,11 +5,21 @@
 
 // 框架初始化（但是并未开始运行）
 
+if (defined('TUNER_VERSION')){
+	// 框架已经加载，直接返回。
+	return true; 
+} else {
+	// tunner 版本号
+	define('TUNER_VERSION', 1);
+}
+
 // 运行模式
 define('RUN_MODEL', isset($_SERVER['REQUEST_METHOD']) || isset($_SERVER['HTTP_HOST']) ? 'CGI' : 'CLI');
 
+$app_root_dir = dirname(realpath($_SERVER['SCRIPT_FILENAME']));
+
 // 应用程序的根目录
-defined('APP_ROOT_DIR') || define('APP_ROOT_DIR', dirname(realpath($_SERVER['SCRIPT_FILENAME'])));
+defined('APP_ROOT_DIR') || define('APP_ROOT_DIR', TUNER_VERSION >= 1 ? dirname($app_root_dir) : $app_root_dir);
 
 // 应用程序类库目录
 defined('APP_LIB_DIR') || define('APP_LIB_DIR', APP_ROOT_DIR . DIRECTORY_SEPARATOR . 'lib');
@@ -42,37 +52,41 @@ date_default_timezone_set('Etc/GMT-8');
 ini_set('default_socket_timeout', 30);
 
 // 类的默认加载
-spl_autoload_register(_createLoader_(
-	array(APP_CONTROLLER_DIR, __ROOT__ . "/controller"), // 控制器寻找目录
-	array(APP_MODEL_DIR, __ROOT__ . "/model"), // 模型寻找目录
-	array(APP_LIB_DIR, APP_ROOT_DIR, __ROOT_LIB_DIR__, __ROOT__) // 其它类寻找目录
-));
+spl_autoload_register(_createLoader_(array(
+	'controller' => array(
+		__ROOT__ . DIRECTORY_SEPARATOR . 'controller', // 框架控制钱目录
+	),
+	'model' => array(
+		__ROOT__ . DIRECTORY_SEPARATOR . 'model', // 模型寻找目录
+	),
+	'final' => array(// 其它类寻找目录
+		APP_LIB_DIR, 
+		APP_ROOT_DIR, 
+		__ROOT_LIB_DIR__, 
+		__ROOT__
+	),
+)));
 
 // 创建加载器
-function _createLoader_($controller_dir, $model_dir, $final_dir) {
-	return function ($class) use ($controller_dir, $model_dir, $final_dir) {
+function _createLoader_($dir_list) {
+	//print_r($dir_list);
+	return function ($class) use ($dir_list) {
 		// 限制类名仅能由字母数字组成
 		if (!preg_match('/[\d\w]/i', $class)) {
 			throw new Exception("class 含非法字符");
 		}
-		switch (true) {
-		case preg_match('/[\d\w]+Controller$/i', $class):
-			$scan_dirs = $controller_dir;
-			// require APP_CONTROLLER_DIR."/{$class}.php";
-			break;
-		case preg_match('/[\d\w]+Model$/i', $class):
-			$scan_dirs = $model_dir;
-			// require APP_MODEL_DIR."/{$class}.php";
-			break;
-		default:
-			$scan_dirs = $final_dir;
-
+		$type = 'final';
+		if(preg_match('/.+(Controller|Model)$/i', $class, $match)){
+			$type = strtolower($match[1]);
+			$scan_dirs = $dir_list[$type];
 		}
+		$scan_dirs = $dir_list[$type];
 		if (!is_array($scan_dirs)) {
 			$scan_dirs = array($scan_dirs);
 		}
 		foreach ($scan_dirs as $dir) {
 			$filepath = "$dir/{$class}.php";
+			//echo $filepath.PHP_EOL;
 			if (file_exists($filepath)) {
 				require $filepath;
 				break;
@@ -83,3 +97,6 @@ function _createLoader_($controller_dir, $model_dir, $final_dir) {
 
 // composer autoload
 require 'vendor' . DIRECTORY_SEPARATOR . 'autoload.php';
+
+// page cache 
+
