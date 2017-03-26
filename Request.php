@@ -34,8 +34,11 @@ class Request {
 		$this->format    = $this->getFormat();
 		$this->client_ip = static::getClientIp();
 		$this->is_ajax   = static::isAjax();
-		// 使用PATH_INFO路由
-		$this->route_uri = isset($_SERVER['PATH_INFO']) ? $_SERVER['PATH_INFO'] : $this->uri;
+		$this->route_uri = $this->uri;
+		// 使用 PATH_INFO 路由
+		if($this->route_uri = '/index.php' && isset($_SERVER['PATH_INFO']) && $_SERVER['PATH_INFO']){
+			$this->route_uri = $_SERVER['PATH_INFO'];
+		}
 		// 将多个／替换成一个
 		$this->route_uri = preg_replace('#/{1,}#', '/', $this->route_uri);
 		$is_https       = self::isHttps();
