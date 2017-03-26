@@ -16,7 +16,7 @@ class Tpl {
 		//加载模版引擎
 		Twig_Autoloader::register();
 		if (preg_match('/\.(html|tpl)*$/i', $tpl_file)) { //文件路径
-			if (!is_array($template_config['path'])) {
+			if (isset($template_config['path']) && !is_array($template_config['path']) && $template_config['path']) {
 				$template_config['path'] = array($template_config['path']);
 			}
 			//加载系统的模版路径
