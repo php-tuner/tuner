@@ -205,6 +205,36 @@ class Model {
 		$re              = $this->query($sql);
 		return $this->lastLink()->lastInsertId();
 	}
+	
+	// 插入多条记录
+	public function insertBatch($sets, $table = ''){
+		$table || $table = $this->table;
+		$table           = $this->escape($table);
+		
+		if(!is_array($sets)){
+			throw new Exception("insertBatch 参数错误");
+		}
+		$first_set = current($sets);
+		if(!is_array($first_set)){
+			throw new Exception("insertBatch 参数错误");
+		}
+		$sql = "INSERT INTO `$table` ";
+		$fields = array();
+		foreach(array_keys($first_set) as $field){
+			$fields[] = $this->escape($field);
+		}
+		foreach($sets as $key => $set){
+			foreach($set as $k => $v){
+				$set[$k] = $this->escape($v);
+			}
+			$sets[$key] = implode("','", $set);
+		}
+		$fields = implode('`,`', $fields);
+		$sets = implode("'),('", $sets);
+		$sql             = "INSERT INTO `$table` (`$fields`) values ('$sets')";
+		$re              = $this->query($sql);
+		return $this->lastLink()->lastInsertId();
+	}
 
 	// 更新单条记录
 	public function updateOne($sets, $wheres, $table = '') {
