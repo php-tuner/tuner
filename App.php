@@ -16,7 +16,7 @@ class App {
 		}
 		// 初始化开始
 		Log::init($is_debug);
-		if ($is_debug && Config::$mode == 'dev') {
+		if ($is_debug && TUNER_MODE == 'dev') {
 			ini_set('display_errors', 1);
 			error_reporting(E_ALL);
 		}

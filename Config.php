@@ -6,8 +6,9 @@
 // 配置
 class Config {
 
-	// 模式
+	// 模式(已废弃不要再使用)
 	public static $mode = 'dev';
+	
 	// 配置缓存数组
 	private static $cache = array();
 
@@ -21,7 +22,11 @@ class Config {
 			return self::$cache[$filename];
 		}
 		$cfg = array();
-		foreach (array(__ROOT__ . '/config', APP_CONFIG_DIR, APP_CONFIG_DIR . '/' . self::$mode) as $dir) {
+		$cfg_dirs = array(__ROOT__ . '/config', APP_CONFIG_DIR);
+		if(TUNER_MODE){
+			$cfg_dirs[] = APP_CONFIG_DIR . '/' . self::$mode;
+		}
+		foreach ($cfg_dirs as $dir) {
 			$filepath = "$dir/{$filename}.$ext";
 			if (file_exists($filepath)) {
 				$_cfg = require $filepath;
