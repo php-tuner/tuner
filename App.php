@@ -66,9 +66,12 @@ class App {
 				$pathinfo = pathinfo($route_path);
 				//$pathinfo = pathinfo(parse_url($req->uri, PHP_URL_PATH));
 				$ext    = isset($pathinfo['extension']) ? $pathinfo['extension'] : '';
-				$pathinfo['dirname'] = ltrim($pathinfo['dirname'], './');
-				$path = $pathinfo['dirname'] ? "{$pathinfo['dirname']}/{$pathinfo['filename']}" : $pathinfo['filename'];
-				$path   = str_replace(array('//'), '', $path);
+				$path = '/';
+				if(isset($pathinfo['dirname'])){
+					$pathinfo['dirname'] = ltrim($pathinfo['dirname'], './');
+					$path = $pathinfo['dirname'] ? "{$pathinfo['dirname']}/{$pathinfo['filename']}" : $pathinfo['filename'];
+					$path   = str_replace(array('//'), '', $path);
+				}
 				$params = explode("/", trim($path, '/'));
 
 				//附加上最后的文件名
