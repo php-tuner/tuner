@@ -79,10 +79,10 @@ class Config {
 			$val = null;
 			if(isset($conf[$arg])){
 				$val = $conf[$arg];
-			}elseif(strpos($cfg, '.') !== false){
+			}elseif(strpos($arg, '.') !== false){
 				$val = $conf;
-				foreach(explode('.', $cfg) as $key){
-					if(!isset($tmp[$key])){
+				foreach(explode('.', $arg) as $key){
+					if(!isset($val[$key])){
 						$val = null;
 						break;
 					}
