@@ -5,6 +5,7 @@
 
 // 日志操作
 class Log {
+	
 	private static $data     = array();
 	private static $is_debug = false;
 
@@ -16,7 +17,8 @@ class Log {
 	public static function debug() {
 		$vars = func_get_args();
 		foreach ($vars as $var) {
-			self::$data['debug'][] = self::getVarString($var);
+			$lines = self::getVarString($var);
+			self::$data['debug'][] = $lines;
 		}
 	}
 
