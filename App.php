@@ -111,7 +111,7 @@ class App {
 					$index = strrpos($sub_dir, '/');
 					$sub_dir = $index === false ? '' : substr($sub_dir, 0, $index);
 				}while(true);
-				spl_autoload_register(_createLoader_($autoload_dir));
+				spl_autoload_register(_createLoader_($autoload_dir), true, true);
 				
 				if (!class_exists($class)) {
 					throw new Exception("not found(controller: $class)", 404);
@@ -147,7 +147,7 @@ class App {
 			Route::dispatch($req, $res, $cfg);
 		} catch (Exception $e) {
 			//Todo 需要优化
-			self::handleException($e);
+                        (new Controller($req, $res, $cfg))->_handleException($e);
 		}
 		return $app;
 	}
@@ -157,7 +157,7 @@ class App {
 		Log::debug($e);
 		$code                = $e->getCode() ? $e->getCode() : 500;
 		$msg                 = $e->getMessage();
-		header($msg, true, $code);
+		header("Tuner-Error: $code", true, 500);
 		echo <<<HTML
 <!DOCTYPE html>
 <html>
