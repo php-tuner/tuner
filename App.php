@@ -152,27 +152,6 @@ class App {
 		return $app;
 	}
 
-	//处理异常
-	public static function handleException($e) {
-		Log::debug($e);
-		$code                = $e->getCode() ? $e->getCode() : 500;
-		$msg                 = $e->getMessage();
-		header("Tuner-Error: $code", true, 500);
-		echo <<<HTML
-<!DOCTYPE html>
-<html>
-<head>
-<title>$msg - $code</title>
-<meta charset="utf-8" />
-</head>
-<body>
-	<h3>$msg - $code</h3>
-</body>
-</html>
-HTML;
-		exit(0);
-	}
-
 	//all done
 	public function __destruct() {
 		Log::show();
