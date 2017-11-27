@@ -280,6 +280,9 @@ class Model {
 
 	// 获取多条记录中制定字段的结果
 	public function getValues($rows, $fields = array()) {
+		if(empty($rows)){
+			return array();
+		}
 		if (!is_array($fields)) {
 			$fields = array($fields);
 		}
