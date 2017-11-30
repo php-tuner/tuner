@@ -174,6 +174,16 @@ class Response {
 		$this->addHeader("Content-Type: text/txt; charset={$charset}");
 		$this->_output($data);
 	}
+	
+	// 显示 jpeg 图片
+	public function jpg($file_path)
+	{
+		if(!file_exists($file_path)){
+			throw new Exception('图片不存在');
+		}
+		header("Content-Type: image/jpeg", true);
+		readfile($file_path);
+	}
 
 	//404 not found
 	public function notFound() {
