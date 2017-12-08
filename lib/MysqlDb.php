@@ -72,7 +72,10 @@ class MysqlDb {
 	public function begin() {
 		$this->changeLinkType('master');
 		$link = $this->getRawLink();
-		$link->beginTransaction();
+		$re = $link->beginTransaction();
+		if($re !== true){
+			throw new Exception('事务启动失败～');
+		}
 	}
 
 	//提交事务
