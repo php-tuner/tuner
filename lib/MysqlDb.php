@@ -8,9 +8,12 @@ class MysqlDb {
 	private $config     = null;
 	private $default_db = null;
 
+	// useless ?
 	private $master_link = null;
 	private $slave_link  = null;
+	
 	private $last_link = null;
+	private $transaction_link = null;
 
 	private static $links = array();
 
@@ -70,9 +73,10 @@ class MysqlDb {
 
 	//开启事务
 	public function begin() {
-		$this->changeLinkType('master');
-		$link = $this->getRawLink();
-		$re = $link->beginTransaction();
+		$options = Config::pdo();
+		$options[PDO::ATTR_AUTOCOMMIT] = 0;
+		$this->transaction_link = $this->getRawLink('master', true, $options);
+		$re = $this->transaction_link->beginTransaction();
 		if($re !== true){
 			throw new Exception('事务启动失败～');
 		}
@@ -80,16 +84,14 @@ class MysqlDb {
 
 	//提交事务
 	public function commit() {
-		$link = $this->getRawLink();
-		$link->commit();
-		$this->link_type = null;
+		$this->transaction_link->commit();
+		$this->transaction_link = null;
 	}
 
 	// 回滚事务
 	public function rollback() {
-		$link = $this->getRawLink();
-		$link->rollback();
-		$this->link_type = null;
+		$this->transaction_link->rollback();
+		$this->transaction_link = null;
 	}
 
 	// 转义字符
@@ -100,7 +102,7 @@ class MysqlDb {
 	}
 
 	// 连接数据库
-	public function getRawLink($type = 'slave', $force_new = false) {
+	public function getRawLink($type = 'slave', $force_new = false, $driver_options = array()) {
 		//$type || $type = $this->link_type;
 		if (!isset($this->config[$type])) {
 			throw new Exception("not found $type config");
@@ -119,7 +121,7 @@ class MysqlDb {
 		}
 		self::$links[$link_key] = null; //destory it
 		try {
-			$link = new PDO($dsn, $user, $password, Config::pdo());
+			$link = new PDO($dsn, $user, $password, $driver_options ? $driver_options : Config::pdo());
 		} catch (Exception $e) {
 			$this->log("erorr:{$e->getMessage()}, dsn: $dsn", "info");
 			throw new $e;
@@ -154,14 +156,17 @@ class MysqlDb {
 	public function query($sql, $params = array(), $options = array(), $force_new = false) {
 		try{
 			$sql = trim($sql);
-			//preg_match('/^\s*"?(SET|INSERT|UPDATE|DELETE|REPLACE|CREATE|DROP|TRUNCATE|LOAD|COPY|ALTER|RENAME|GRANT|REVOKE|LOCK|UNLOCK|REINDEX)\s/i', $sql);
-			$is_select = preg_match('/^SELECT\s+/i', $sql);
-			//非事务状态下自动切换主从
-			$link_type = $this->link_type;
-			if (!$link_type) {
-				$link_type = $is_select ? 'slave' : 'master';
+			if($this->transaction_link){
+				$link = $this->transaction_link;
+			}else{
+				$is_select = preg_match('/^SELECT\s+/i', $sql);
+				// 非事务状态下自动切换主从
+				$link_type = $this->link_type;
+				if (!$link_type) {
+					$link_type = $is_select ? 'slave' : 'master';
+				}
+				$link = $this->last_link = $this->getRawLink($link_type, $force_new);	
 			}
-			$link = $this->last_link = $this->getRawLink($link_type, $force_new);
 			//Log::debug($link);
 			$start_time = microtime(true);
 			$error_info = array();
