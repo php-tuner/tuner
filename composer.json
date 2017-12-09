@@ -1,7 +1,7 @@
 {
     "name": "tomheng/tuner",
     "description": "tunning your app",
-    "type": "web framework",
+    "type": "framework",
     "license": "mit",
     "authors": [
         {
