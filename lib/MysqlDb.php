@@ -165,8 +165,9 @@ class MysqlDb {
 				if (!$link_type) {
 					$link_type = $is_select ? 'slave' : 'master';
 				}
-				$link = $this->last_link = $this->getRawLink($link_type, $force_new);	
+				$link = $this->getRawLink($link_type, $force_new);
 			}
+			$this->last_link = $link;
 			//Log::debug($link);
 			$start_time = microtime(true);
 			$error_info = array();
