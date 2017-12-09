@@ -76,8 +76,8 @@ class MysqlDb {
 		$options = Config::pdo();
 		$options[PDO::ATTR_AUTOCOMMIT] = 0;
 		$this->transaction_link = $this->getRawLink('master', true, $options);
-		$re = $this->transaction_link->beginTransaction();
-		if($re !== true){
+		$this->transaction_link->beginTransaction();
+		if($this->transaction_link->inTransaction() !== true){
 			throw new Exception('事务启动失败～');
 		}
 	}
