@@ -5,12 +5,12 @@
 
 // 框架初始化（但是并未开始运行）
 
-if (defined('TUNER_VERSION')){
-	// 框架已经加载，直接返回。
-	return true; 
+if (defined('TUNER_VERSION')) {
+    // 框架已经加载，直接返回。
+    return true;
 } else {
-	// tunner 版本号
-	define('TUNER_VERSION', 1);
+    // tunner 版本号
+    define('TUNER_VERSION', 1);
 }
 
 // TUNER_MODE 模式
@@ -56,50 +56,50 @@ ini_set('default_socket_timeout', 30);
 
 // 类的默认加载
 spl_autoload_register(_createLoader_(array(
-	'controller' => array(
-		__ROOT__ . DIRECTORY_SEPARATOR . 'controller', // 框架控制钱目录
-	),
-	'model' => array(
-		__ROOT__ . DIRECTORY_SEPARATOR . 'model', // 模型寻找目录
-	),
-	'final' => array(// 其它类寻找目录
-		APP_LIB_DIR, 
-		APP_ROOT_DIR, 
-		__ROOT_LIB_DIR__, 
-		__ROOT__
-	),
+    'controller' => array(
+        __ROOT__ . DIRECTORY_SEPARATOR . 'controller', // 框架控制钱目录
+    ),
+    'model' => array(
+        __ROOT__ . DIRECTORY_SEPARATOR . 'model', // 模型寻找目录
+    ),
+    'final' => array(// 其它类寻找目录
+        APP_LIB_DIR,
+        APP_ROOT_DIR,
+        __ROOT_LIB_DIR__,
+        __ROOT__
+    ),
 )));
 
 // 创建加载器
-function _createLoader_($dir_list) {
-	//print_r($dir_list);
-	return function ($class) use ($dir_list) {
-		// 限制类名仅能由字母数字组成
-		if (!preg_match('/[\d\w]/i', $class)) {
-			throw new Exception("class 含非法字符");
-		}
-		$type = 'final';
-		if(preg_match('/.+(Controller|Model)$/i', $class, $match)){
-			$type = strtolower($match[1]);
-			$scan_dirs = $dir_list[$type];
-		}
-		$scan_dirs = $dir_list[$type];
-		if (!is_array($scan_dirs)) {
-			$scan_dirs = array($scan_dirs);
-		}
-		foreach ($scan_dirs as $dir) {
-			$filepath = "$dir/{$class}.php";
-			//echo $filepath.PHP_EOL;
-			if (file_exists($filepath)) {
-				require $filepath;
-				break;
-			}
-		}
-	};
+function _createLoader_($dir_list)
+{
+    //print_r($dir_list);
+    return function ($class) use ($dir_list) {
+        // 限制类名仅能由字母数字组成
+        if (!preg_match('/[\d\w]/i', $class)) {
+            throw new Exception("class 含非法字符");
+        }
+        $type = 'final';
+        if (preg_match('/.+(Controller|Model)$/i', $class, $match)) {
+            $type = strtolower($match[1]);
+            $scan_dirs = $dir_list[$type];
+        }
+        $scan_dirs = $dir_list[$type];
+        if (!is_array($scan_dirs)) {
+            $scan_dirs = array($scan_dirs);
+        }
+        foreach ($scan_dirs as $dir) {
+            $filepath = "$dir/{$class}.php";
+            //echo $filepath.PHP_EOL;
+            if (file_exists($filepath)) {
+                require $filepath;
+                break;
+            }
+        }
+    };
 }
 
 // composer autoload
 require 'vendor' . DIRECTORY_SEPARATOR . 'autoload.php';
 
-// page cache 
-
+// page cache

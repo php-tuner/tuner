@@ -7,6 +7,6 @@
 $cache_dir = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'template_cache' . DIRECTORY_SEPARATOR . PROJECT . '_' . md5(APP_ROOT_DIR);
 $path = APP_ROOT_DIR . DIRECTORY_SEPARATOR . 'view';
 return array(
-	'path' => file_exists($path) ? $path : NULL,
-	'cache' => $cache_dir,
+    'path' => file_exists($path) ? $path : null,
+    'cache' => $cache_dir,
 );
