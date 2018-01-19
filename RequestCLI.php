@@ -65,4 +65,18 @@ class RequestCLI
         }
         return isset($this->fake_post[$key]) ? $this->fake_post[$key] : null;
     }
+	
+
+    public static function gpc($key = null)
+    {
+        if (empty($key)) {
+            return $this->fake_get + $this->fake_post;
+        }
+        foreach (array($this->fake_get, $this->fake_post) as $params) {
+            if (isset($params[$key])) {
+                return $params[$key];
+            }
+        }
+        return null;
+    }
 }
