@@ -14,7 +14,7 @@ if (defined('TUNER_VERSION')) {
 }
 
 // TUNER_MODE 模式
-defined('TUNER_MODE') || define('TUNER_MODE', isset($_SERVER['TUNER_MODE']) ? $_SERVER['TUNER_MODE'] : 'dev');
+defined('TUNER_MODE') || define('TUNER_MODE', getenv('TUNER_MODE') ? getenv('TUNER_MODE') : 'dev');
 
 // 运行模式
 define('RUN_MODEL', isset($_SERVER['REQUEST_METHOD']) || isset($_SERVER['HTTP_HOST']) ? 'CGI' : 'CLI');
