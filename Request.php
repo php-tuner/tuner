@@ -52,6 +52,10 @@ class Request
         } else {
             $this->base_url .= $_SERVER['REQUEST_URI'];
         }
+        // 解析 json 格式的 POST 体
+        if(isset($this->header['Content-Type']) && preg_match('#^application/json;#i', $this->header['Content-Type'])){
+            $_POST = json_decode(file_get_contents("php://input"), true);
+        }
     }
     
     // 检测是否是https请求
@@ -231,12 +235,22 @@ class Request
     // 获取输出格式
     private static function getFormat()
     {
-        //force_format
+        // force_format
         $format = self::get('_format');
-        if (!$format) {
+        if (empty($format) && isset($_SERVER['REQUEST_URI'])) {
             $path   = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
             $format = pathinfo($path, PATHINFO_EXTENSION);
         }
+        // detect HTTP_ACCEPT.
+        if(empty($format) && isset($_SERVER['HTTP_ACCEPT'])){
+            // text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8
+            $accept = trim($_SERVER['HTTP_ACCEPT']);
+            if(preg_match('#[^/,]*/([^/,]*)#', $accept, $match)){
+                $index = stripos($match[1], '+');
+                $format = trim($index === false ? $match[1] : substr($match[1], 0, $index));
+            }
+        }
+        
         return $format ? strtolower($format) : 'html';
     }
 
