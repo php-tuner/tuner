@@ -6,7 +6,7 @@
 class Session
 {
 
-    //启动session
+    // 启动session
     public static function start()
     {
         if (!isset($_SESSION)) {
