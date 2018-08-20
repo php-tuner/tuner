@@ -18,7 +18,7 @@ class MysqlDb
 
     private static $links = array();
 
-    //连接类型
+    // 连接类型
     private $link_type = '';
 
     public function __construct($config, $dbname = '')
@@ -27,7 +27,7 @@ class MysqlDb
         $this->default_db = $dbname;
     }
 
-    //Todo: implement
+    // Todo: implement
     public function __toString()
     {
         return print_r($this, true);
@@ -49,12 +49,12 @@ class MysqlDb
             "CONNECTION_STATUS", // Oracle does not have the attributes
             "DRIVER_NAME",
             "ERRMODE",
-           //"ORACLE_NULLS",
+           // "ORACLE_NULLS",
             "PERSISTENT",
-            //"PREFETCH", // Oracle  and MySQL does not have the attributes
+            // "PREFETCH", // Oracle  and MySQL does not have the attributes
             "SERVER_INFO",
             "SERVER_VERSION",
-            //"TIMEOUT" // Oracle  and MySQL does not have the attributes
+            // "TIMEOUT" // Oracle  and MySQL does not have the attributes
         );
         $result = array();
         foreach ($attributes as $attr) {
@@ -119,7 +119,7 @@ class MysqlDb
     // 连接数据库
     public function getRawLink($type = 'slave', $force_new = false, $driver_options = array())
     {
-        //$type || $type = $this->link_type;
+        // $type || $type = $this->link_type;
         if (!isset($this->config[$type])) {
             throw new Exception("not found $type config");
         }
@@ -135,7 +135,7 @@ class MysqlDb
         if (isset(self::$links[$link_key]) && !$force_new) {
             return self::$links[$link_key];
         }
-        self::$links[$link_key] = null; //destory it
+        self::$links[$link_key] = null; // destory it
         try {
             $link = new PDO($dsn, $user, $password, $driver_options ? $driver_options : Config::pdo());
         } catch (Exception $e) {
@@ -145,13 +145,13 @@ class MysqlDb
         return self::$links[$link_key] = $link;
     }
     
-    //返回最近使用的链接
+    // 返回最近使用的链接
     public function lastLink()
     {
         return $this->last_link;
     }
     
-    //切换主从
+    // 切换主从
     public function changeLinkType($type)
     {
         if (!in_array($type, array('slave', 'master'))) {
@@ -160,7 +160,7 @@ class MysqlDb
         $this->link_type = $type;
     }
 
-    //记录错误日志
+    // 记录错误日志
     private function log($log_str, $type = "error")
     {
         $link = $this->last_link;
@@ -171,7 +171,7 @@ class MysqlDb
         Log::file("{$type}\t{$log_str}\t$version_info", "mysql");
     }
 
-    //执行SQL
+    // 执行SQL
     public function query($sql, $params = array(), $options = array(), $force_new = false)
     {
         try {
@@ -188,7 +188,7 @@ class MysqlDb
                 $link = $this->getRawLink($link_type, $force_new);
             }
             $this->last_link = $link;
-            //Log::debug($link);
+            // Log::debug($link);
             $start_time = microtime(true);
             $error_info = array();
             if ($params) {
@@ -212,30 +212,30 @@ class MysqlDb
         if ($error_info) {
             $err_msg = "sql:$sql\terror_info:{$error_info[0]},{$error_info[1]},{$error_info[2]}";
             Log::debug($err_msg);
-            //记录错误日志
+            // 记录错误日志
             $this->log($err_msg);
             if (in_array($error_info[1], array(
-                '2006', //MySQL server has gone away
-                '2013', //Lost connection to MySQL server during query
+                '2006', // MySQL server has gone away
+                '2013', // Lost connection to MySQL server during query
             )) && !$force_new) {
                 $this->log("reconnect", "info");
                 return $this->query($sql, $params, $options, true);
             } else {
-                //是否要抛出异常
+                // 是否要抛出异常
                 throw new Exception("数据库操作发生错误");
             }
         }
         return $sth;
     }
 
-    //执行SQL返回一条记录
+    // 执行SQL返回一条记录
     public function queryRow($sql)
     {
         $result = $this->query($sql);
         return $result->fetch(PDO::FETCH_ASSOC);
     }
 
-    //执行SQL返回多条记录
+    // 执行SQL返回多条记录
     public function queryRows($sql)
     {
         $result = $this->query($sql);
