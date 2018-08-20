@@ -90,7 +90,7 @@ function _createLoader_($dir_list)
         }
         foreach ($scan_dirs as $dir) {
             $filepath = "$dir/{$class}.php";
-            //echo $filepath.PHP_EOL;
+            // echo $filepath.PHP_EOL;
             if (file_exists($filepath)) {
                 require $filepath;
                 break;
