@@ -76,7 +76,7 @@ class MysqlDb
         self::$links = array();
     }
 
-    //开启事务
+    // 开启事务
     public function begin()
     {
         $options = Config::pdo();
@@ -88,9 +88,12 @@ class MysqlDb
         }
     }
 
-    //提交事务
+    // 提交事务
     public function commit()
     {
+        if(is_null($this->transaction_link)){
+            throw new Exception('you may forgot to call begin.');
+        }
         $this->transaction_link->commit();
         $this->transaction_link = null;
     }
@@ -98,6 +101,9 @@ class MysqlDb
     // 回滚事务
     public function rollback()
     {
+        if(is_null($this->transaction_link)){
+            throw new Exception('you may forgot to call begin.');
+        }
         $this->transaction_link->rollback();
         $this->transaction_link = null;
     }
@@ -134,7 +140,7 @@ class MysqlDb
             $link = new PDO($dsn, $user, $password, $driver_options ? $driver_options : Config::pdo());
         } catch (Exception $e) {
             $this->log("erorr:{$e->getMessage()}, dsn: $dsn", "info");
-            throw new $e;
+            throw $e;
         }
         return self::$links[$link_key] = $link;
     }
