@@ -262,7 +262,7 @@ class Http
         return current($re);
     }
 
-    public static function getCurlInstance($url, $connect_timeout = 1, $read_timeout = 3, $max_redirect = 2)
+    public static function getCurlInstance($url, $connect_timeout = 2, $read_timeout = 3, $max_redirect = 2)
     {
         $ch = curl_init($url);
         if (!is_resource($ch)) {
