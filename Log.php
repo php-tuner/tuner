@@ -52,6 +52,14 @@ class Log
         }
     }
 
+
+    // 记录错误日志
+    public static function error()
+    {
+        $msg = implode(PHP_EOL, func_get_args());
+        return self::file($msg, 'error');
+    }
+
     // 日志写到文件中
     public static function file($str, $dir = 'common', $rotate_type = 'day')
     {
@@ -59,7 +67,9 @@ class Log
         if (stripos($dir, '/') !== 0) {
             $base_dir = Config::site('log_dir');
             if (!$base_dir) {
-                return trigger_error('须设置日志记录目录～');
+                $tmp_dir = rtrim(sys_get_temp_dir(), DIRECTORY_SEPARATOR);
+                $base_dir = $tmp_dir.DIRECTORY_SEPARATOR.'tuner';
+                // return trigger_error('须设置日志记录目录～');
             }
             $dir = Helper::dir($base_dir, $dir);
         }
