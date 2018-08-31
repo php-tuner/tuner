@@ -14,13 +14,24 @@ class Controller
     protected $req         = null;
     protected $res         = null;
     protected $cfg         = array();
-    // 模版数据
+    // 安全的异常类，这些异常类生成的对象将直接暴露给用户
+    protected $safe_exception_class = array();
+    // 模版文件
+    private $template_file = '';
 
     public function __construct($req, $res, $cfg)
     {
         $this->req = $req; // 请求
         $this->res = $res; // 响应
         $this->cfg = $cfg; // 配置
+    }
+
+    // 设置模版文件
+    public function setTplFile($file_path)
+    {
+        $file_path = trim($file_path);
+        $file_path = strtolower($file_path);
+        $this->template_file = $file_path;
     }
 
     // 默认首页
@@ -79,7 +90,7 @@ class Controller
             $url = $this->buildUrl($url);
         }
         $this->res->redirect($url, $code, false);
-        //显示一段 html
+        // 显示一段 html
         $this->display('redirect.html', array(
             'url' => $url,
         ));
@@ -119,18 +130,13 @@ class Controller
         return $url . $query_string;
     }
 
-    // 渲染数据
-    protected function render($template_file, $data = array())
-    {
-        return Tpl::render($template_file, array_merge(array(
-            '_cfg_' => $this->cfg,
-        ), $data), $this->res->charset);
-    }
-
-    // 模版引擎渲染输出(如果仅需要渲染数据不需要输出，请使用render函数)
-    protected function display($template_file, $data = array(), $return = false)
-    {
-
+    // 格式化模版文件
+    // TODO rethink.
+    private function formatTplFile($template_file){
+        $template_file = trim($template_file);
+        if(empty($template_file)){
+            return '';
+        }
         $detect = new MobileDetect();
         if ($detect->isMobile() || $this->req->get('_version') == 'mobile') {
             $pinfo    = pathinfo($template_file);
@@ -142,7 +148,36 @@ class Controller
                 $template_file = $tpl_file;
             }
         }
+        return $template_file;
+    }
 
+    // 渲染数据
+    protected function render($template_file, $data = array())
+    {
+        $template_file = $this->formatTplFile($template_file);
+        return Tpl::render($template_file, array_merge(array(
+            '_cfg_' => $this->cfg,
+        ), $data), $this->res->charset);
+    }
+    
+    // 模版引擎渲染输出
+    protected function tpl($data = array(), $template_file = '')
+    {
+        $template_file = trim($template_file);
+        if(empty($template_file)){
+            $template_file = $this->template_file;
+        }
+        $template_file = $this->formatTplFile($template_file);
+        $output = $this->render($template_file, $data);
+        $format = $this->req->format;
+        $this->res->output($output, $format);
+    }
+
+    // 模版引擎渲染输出(如果仅需要渲染数据不需要输出，请使用render函数)
+    // DEPRECTED!
+    protected function display($template_file, $data = array(), $return = false)
+    {
+        $template_file = $this->formatTplFile($template_file);
         $output = $this->render($template_file, $data);
         // 直接返回
         if ($return) {
@@ -150,7 +185,7 @@ class Controller
         }
         // 按json结构输出
         $format = $this->req->format;
-        if (in_array($this->req->format, array('xml', 'json'))) {
+        if (in_array($format, array('xml', 'json'))) {
             $output = array(
                 'html_content' => $output,
             );
@@ -174,15 +209,24 @@ class Controller
     public function _handleException($e)
     {
         $format = $this->req->format;
+        $class_name = get_class($e);
+        if(in_array($class_name, $this->safe_exception_class)){
+            $msg    = $e->getMessage();
+        }else{
+            // TODO 记录日志（生成唯一表示）
+            $id = uniqid('Exception-');
+            $msg    = "系统错误($id)～";
+            Log::error($id, $e->getMessage());
+        }
+        // TODO SHOULD BETTER.
         $code   = $e->getCode() ? $e->getCode() : 1;
-        $msg    = $e->getMessage();
         switch ($format) {
             case 'json':
             case 'xml':
                 $data = array(
-                'error_msg'  => $msg,
-                'error_code' => $code,
-                    );
+                    'error_msg'  => $msg,
+                    'error_code' => $code,
+                );
                 break;
             default: // html
                 $data = array(
