@@ -14,16 +14,16 @@ class Controller
     protected $req         = null;
     protected $res         = null;
     protected $cfg         = array();
-    //模版数据
+    // 模版数据
 
     public function __construct($req, $res, $cfg)
     {
-        $this->req = $req; //请求
-        $this->res = $res; //响应
-        $this->cfg = $cfg; //配置
+        $this->req = $req; // 请求
+        $this->res = $res; // 响应
+        $this->cfg = $cfg; // 配置
     }
 
-    //默认首页
+    // 默认首页
     public function index()
     {
         $this->res->html("<h1>Not found default action(index).</h1>");
@@ -39,7 +39,7 @@ class Controller
         $this->res->cache($cache_key, $lifetime);
     }
 
-    //call other controller action
+    // call other controller action
     public function callAction($action, $controller = null)
     {
 
@@ -49,7 +49,7 @@ class Controller
             $pathinfo   = pathinfo($controller);
             $controller = new $pathinfo['basename']();
         }
-        //打开输出缓冲
+        // 打开输出缓冲
         ob_start();
         call_user_func_array(array($controller, $action));
         $re = ob_get_contents();
@@ -57,10 +57,10 @@ class Controller
         return $re;
     }
 
-    //获取模版
+    // 获取模版
     protected function getTpl($template_config, $charset = 'utf8')
     {
-        //加载模版引擎
+        // 加载模版引擎
         Twig_Autoloader::register();
         $loader = new Twig_Loader_Filesystem($template_config['path']);
         return new Twig_Environment($loader, array(
@@ -71,10 +71,10 @@ class Controller
         ));
     }
 
-    //重定向
+    // 重定向
     protected function redirect($url, $code = 302)
     {
-        //相对链接转换成绝对链接
+        // 相对链接转换成绝对链接
         if (!preg_match('/^https?:\/\//', $url)) {
             $url = $this->buildUrl($url);
         }
@@ -85,7 +85,7 @@ class Controller
         ));
     }
 
-    //直接输出
+    // 直接输出
     protected function output()
     {
         $format = $this->req->format;
@@ -95,11 +95,11 @@ class Controller
         call_user_func_array(array($this->res, $format), func_get_args());
     }
 
-    //构建URL
+    // 构建URL
     protected function buildUrl($uri, $params = array())
     {
         if (preg_match('#^https?://#', $uri)) {
-            $url = $uri; //本身是绝对地址
+            $url = $uri; // 本身是绝对地址
         } else {
             $base_url = $this->req->base_url ? $this->req->base_url : Config::site('base_url');
             $base_url = rtrim($base_url, '/');
@@ -119,7 +119,7 @@ class Controller
         return $url . $query_string;
     }
 
-    //渲染数据
+    // 渲染数据
     protected function render($template_file, $data = array())
     {
         return Tpl::render($template_file, array_merge(array(
@@ -127,7 +127,7 @@ class Controller
         ), $data), $this->res->charset);
     }
 
-    //模版引擎渲染输出(如果仅需要渲染数据不需要输出，请使用render函数)
+    // 模版引擎渲染输出(如果仅需要渲染数据不需要输出，请使用render函数)
     protected function display($template_file, $data = array(), $return = false)
     {
 
@@ -144,11 +144,11 @@ class Controller
         }
 
         $output = $this->render($template_file, $data);
-        //直接返回
+        // 直接返回
         if ($return) {
             return $output;
         }
-        //按json结构输出
+        // 按json结构输出
         $format = $this->req->format;
         if (in_array($this->req->format, array('xml', 'json'))) {
             $output = array(
@@ -158,7 +158,7 @@ class Controller
         $this->res->output($output, $format);
     }
 
-    //操作成功
+    // 操作成功
     protected function success($data = array(), $msg = '操作成功', $halt = true)
     {
         $re = array(
@@ -170,7 +170,7 @@ class Controller
         $halt && exit();
     }
 
-    //异常处理(Todo: 支持backtrace ?)
+    // 异常处理(Todo: 支持backtrace ?)
     public function _handleException($e)
     {
         $format = $this->req->format;
@@ -184,7 +184,7 @@ class Controller
                 'error_code' => $code,
                     );
                 break;
-            default: //html
+            default: // html
                 $data = array(
                     'error_msg'  => $msg,
                     'error_code' => $code,
@@ -198,11 +198,11 @@ class Controller
                 }
                 $data = $this->render('message/error.html', $data);
         }
-        //avoid call child method implemention
+        // avoid call child method implemention
         self::output($data);
     }
 
-    //404 not found(Todo: 优化)
+    // 404 not found(Todo: 优化)
     public function notFound()
     {
         $this->res->notFound();
