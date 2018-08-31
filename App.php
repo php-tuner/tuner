@@ -14,7 +14,7 @@ class App
         if (is_array($opt)) {
             $is_debug = isset($opt['debug']) ? $opt['debug'] : false;
         } else {
-            $is_debug = $opt; // Todo: remove it in the future.
+            $is_debug = $opt; // TODO: remove it in the future.
         }
         // 初始化开始
         Log::init($is_debug);
@@ -58,18 +58,19 @@ class App
         try {
             // 默认处理器
             Route::addHandler(function ($req, $res, $cfg) {
-                //开始查找控制器
+                // 开始查找控制器
                 $route_path = parse_url($req->route_uri, PHP_URL_PATH);
                 if (!$route_path) {
                     $route_path = preg_replace('/\?(.*)/i', '', $req->route_uri);
                 }
                 $route_file_path = realpath(Helper::dir(APP_ROOT_DIR, $route_path));
+                // 静态文件目录，直接输出内容
                 if (preg_match('#^/public/#', $route_path) && is_file($route_file_path)) {
                     $res->file($route_file_path);
                     return true;
                 }
                 $pathinfo = pathinfo($route_path);
-                //$pathinfo = pathinfo(parse_url($req->uri, PHP_URL_PATH));
+                // $pathinfo = pathinfo(parse_url($req->uri, PHP_URL_PATH));
                 $ext    = isset($pathinfo['extension']) ? $pathinfo['extension'] : '';
                 $path = '/';
                 if (isset($pathinfo['dirname'])) {
@@ -79,14 +80,14 @@ class App
                 }
                 $params = explode("/", trim($path, '/'));
 
-                //附加上最后的文件名
-                //$pathinfo['filename'] && $params[] = $pathinfo['filename'];
+                // 附加上最后的文件名
+                // $pathinfo['filename'] && $params[] = $pathinfo['filename'];
                 $len = count($params);
-                //默认倒数第二个是controller, 倒数第一个是action
+                // 默认倒数第二个是 controller, 倒数第一个是 action
                 $controller_pos = $len > 1 ? $len - 2 : 0;
-                //从DOCUMENT_ROOT开始找起
+                // 从 DOCUMENT_ROOT 开始找起
                 $controller_dir = APP_CONTROLLER_DIR;
-                //尝试匹配子目录(大于三层目录时)
+                // 尝试匹配子目录(大于三层目录时)
                 for ($i = 0; $i < $len - 2; $i++) {
                     $value          = $params[$i];
                     $controller_pos = $i;
@@ -97,7 +98,7 @@ class App
                     }
                     $controller_pos++;
                 }
-                //子目录
+                // 子目录
                 $sub_dir = call_user_func_array('Helper::dir', array_slice($params, 0, $controller_pos));
 
                 $controller = isset($params[$controller_pos]) && preg_match('/^([a-zA-Z_\-0-9]+)$/i', $params[$controller_pos]) ? $params[$controller_pos] : Config::common('defaultController');
@@ -122,28 +123,30 @@ class App
                     throw new Exception("not found(controller: $class)", 404);
                 }
                 Log::debug($class);
-                //实例化控制器
+                // 实例化控制器
                 $c = new $class($req, $res, $cfg);
-                //寻找控制器方法
+                // 寻找控制器方法
                 if (isset($params[$controller_pos + 1])) {
                     $action = $params[$controller_pos + 1];
                     if (!preg_match('/^([a-zA-Z_\-0-9]+)$/i', $action)) {
                         throw new Exception("action is illegal", 500);
                     }
                     $action_args = array_slice($params, $i + 2);
-                } else {//目录请求
+                } else { // 目录请求
                     $action = Config::common('defaultAction');
                     $action_args = array_slice($params, $i + 1);
                 }
-                //分隔符也许可以定制
+                // 分隔符也许可以定制
                 $action = str_replace(' ', '', ucwords(str_replace(CAMEL_CLASS_SEP, ' ', $action)));
                 if (!method_exists($c, $action)) {
                     throw new Exception("not found(action: $action)", 404);
                 }
-                //捕获应用层异常，交给controller 处理
+                // 捕获应用层异常，交给controller 处理
                 try {
+                    $c->setTplFile(Helper::dir($sub_dir, $controller, $action).'.html');
+                    // TODO WHY urldecode?
                     $action_args = array_map('urldecode', $action_args);
-                    //action 后的做为参数
+                    // action 后的做为参数
                     call_user_func_array(array($c, $action), $action_args);
                 } catch (Exception $e) {
                     $c->_handleException($e);
@@ -151,13 +154,13 @@ class App
             });
             Route::dispatch($req, $res, $cfg);
         } catch (Exception $e) {
-            //Todo 需要优化
-                        (new Controller($req, $res, $cfg))->_handleException($e);
+            // TODO 需要优化
+            (new Controller($req, $res, $cfg))->_handleException($e);
         }
         return $app;
     }
 
-    //all done
+    // all done
     public function __destruct()
     {
         Log::show();
