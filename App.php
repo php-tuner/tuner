@@ -125,30 +125,31 @@ class App
                 Log::debug($class);
                 // 实例化控制器
                 $c = new $class($req, $res, $cfg);
-                // 寻找控制器方法
-                if (isset($params[$controller_pos + 1])) {
-                    $action = $params[$controller_pos + 1];
-                    if (!preg_match('/^([a-zA-Z_\-0-9]+)$/i', $action)) {
-                        throw new Exception("action is illegal", 500);
-                    }
-                    $action_args = array_slice($params, $i + 2);
-                } else { // 目录请求
-                    $action = Config::common('defaultAction');
-                    $action_args = array_slice($params, $i + 1);
-                }
-                // 分隔符也许可以定制
-                $action = str_replace(' ', '', ucwords(str_replace(CAMEL_CLASS_SEP, ' ', $action)));
-                if (!method_exists($c, $action)) {
-                    throw new Exception("not found(action: $action)", 404);
-                }
                 // 捕获应用层异常，交给controller 处理
                 try {
+                    // 寻找控制器方法
+                    if (isset($params[$controller_pos + 1])) {
+                        $action = $params[$controller_pos + 1];
+                        if (!preg_match('/^([a-zA-Z_\-0-9]+)$/i', $action)) {
+                            throw new Exception("action is illegal", 500);
+                        }
+                        $action_args = array_slice($params, $i + 2);
+                    } else { // 目录请求
+                        $action = Config::common('defaultAction');
+                        $action_args = array_slice($params, $i + 1);
+                    }
+                    // 分隔符也许可以定制
                     $c->setTplFile(Helper::dir($sub_dir, $controller, $action).'.html');
+                    $action = str_replace(' ', '', ucwords(str_replace(CAMEL_CLASS_SEP, ' ', $action)));
+                    if (!method_exists($c, $action)) {
+                        throw new Exception("not found(action: $action)", 404);
+                    }
                     // TODO WHY urldecode?
                     $action_args = array_map('urldecode', $action_args);
                     // action 后的做为参数
                     call_user_func_array(array($c, $action), $action_args);
                 } catch (Exception $e) {
+                    // TODO check _handleException exists ?
                     $c->_handleException($e);
                 }
             });
