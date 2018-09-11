@@ -98,28 +98,6 @@ class Model
         return $this->queryRows($sql);
     }
 
-    // 分页获取
-    public function getPageRows($where_array, $order = '', $limit = '', $table = '')
-    {
-        $sql       = $this->buildSql($where_array, $table);
-        $count_sql = $this->buildCountSql($where_array, $table);
-        $result    = array(
-            'count' => $this->queryFirst($count_sql),
-            'rows'  => array(),
-        );
-        if (!$result['count']) {
-            return $result;
-        }
-        if ($order) {
-            $sql .= " $order ";
-        }
-        if ($limit) {
-            $sql .= " $limit ";
-        }
-        $result['rows'] = $this->queryRows($sql);
-        return $result;
-    }
-
     // 转义字符
     public function escape($v)
     {
@@ -339,4 +317,40 @@ class Model
         }
         return $re;
     }
+    
+    // 获取分页列表
+    public function getPageRows($cond_array, $order_array = array(), $page = 1, $page_size = 50, $fields = array('*'))
+    {
+        $page = intval($page);
+        $page_size = intval($page_size);
+        $offset = ($page - 1) * $page_size;
+        $where_str = $this->getWhereStr($cond_array);
+        $order_str = $this->buildOrderStr($order_array);
+        $count_sql = "SELECT count(*) FROM `{$this->table}` $where_str ";
+        $fields = implode(',', $fields);
+        $sql = "SELECT $fields FROM `{$this->table}` $where_str $order_str LIMIT $offset, $page_size ";
+        $count = intval($this->queryFirst($count_sql));
+        $result = array(
+            'page' => $page,
+            'page_size' => $page_size,
+            'page_count' => ceil($count / $page_size),
+            'offset' => $offset,
+            'count' => $count,
+            'rows' => array(),
+        );
+        if ($result['count']) {
+            $result['rows'] = $this->queryRows($sql);
+        }
+        return $result;
+    }
+
+    // 构建排序语句
+    protected function buildOrderStr($order_array)
+    {
+        if (!$order_array) {
+            return '';
+        }
+        return " ORDER BY ".implode(',', $order_array);
+    }
+    
 }
