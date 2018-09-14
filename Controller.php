@@ -15,7 +15,7 @@ class Controller
     protected $res         = null;
     protected $cfg         = array();
     // 安全的异常类，这些异常类生成的对象将直接暴露给用户
-    protected $safe_exception_class = array();
+    protected $safe_exception_class = array('Exception');
     // 模版文件
     private $template_file = '';
 

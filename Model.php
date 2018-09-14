@@ -64,46 +64,67 @@ class Model
     }
     
     // 构建 SQL 语句
-    protected function buildSql($where_array, $table = '')
+    protected function buildSql($where_array, $fields = array(), $table = '')
     {
+        $args = func_get_args();
+        // 兼容旧版支持传递两个参数
+        if(count($args) == 2){
+            // 第二个参数是数组的话就代表是字段数组
+            if(is_array($args[1])){
+                $fields = $args[1];
+            }else{
+                $table = $args[1];
+            }
+        }
         $table || $table = $this->table;
         $table           = $this->escape($table);
         $where_str       = $this->getWhereStr($where_array);
-        $sql             = "SELECT * FROM `$table` $where_str";
+        $fields_str = '*';
+        if($fields){
+            // build it.
+            $fields_str = implode(',', array_map(array($this, 'escape'), $fields));
+        }
+        $sql             = "SELECT $fields_str FROM `$table` $where_str";
         return $sql;
-    }
-
-    // 构建 count SQL 语句
-    protected function buildCountSql($where_array, $table = '')
-    {
-        $table || $table = $this->table;
-        $table           = $this->escape($table);
-        $where_str       = $this->getWhereStr($where_array);
-        $sql             = "SELECT count(*) FROM `$table` $where_str";
-        return $sql;
-    }
-
-    // 获取单条记录
-    public function getRow($where_array, $table = '')
-    {
-        $sql = $this->buildSql($where_array, $table);
-        $sql .= " LIMIT 1";
-        return $this->queryRow($sql);
     }
 
     // 获取多条记录
-    public function getRows($where_array, $table = '')
+    // getRows($where_array, $table) 
+    // or getRows($where_array, $fields, $table)
+    public function getRows()
     {
-        $sql = $this->buildSql($where_array, $table);
+        $sql = call_user_func_array(array($this, 'buildSql'), func_get_args());
         return $this->queryRows($sql);
+    }
+
+    // 获取单条记录
+    // getRow($where_array, $table) 
+    // getRow($where_array, $fields = array()) 
+    // or getRow($where_array, $fields, $table)
+    public function getRow()
+    {
+        $sql = call_user_func_array(array($this, 'buildSql'), func_get_args());
+        $sql .= " LIMIT 1";
+        return $this->queryRow($sql);
     }
 
     // 转义字符
     public function escape($v)
     {
+        // If you wonder why (besides \, ' and ")  
+        // NUL (ASCII 0), \n, \r, and Control-Z are escaped: 
+        // it is not to prevent sql injection, but to 
+        // prevent your sql logfile to get unreadable.
+        // \，NUL （ASCII 0），\n，\r，'，" 和 Control-Z.
         $search  = array("\\", "\x00", "\n", "\r", "'", '"', "\x1a");
         $replace = array("\\\\", "\\0", "\\n", "\\r", "\'", '\"', "\\Z");
         return str_replace($search, $replace, $v);
+    }
+    
+    // escape like value.
+    // escape _ (underscore) and % (percent) signs, which have special meanings in LIKE clauses. 
+    public function escapeLike($v){
+        return str_replace(array('_', '%'), array('\_', '\%'), $v);
     }
 
     // 构建 where 字串
@@ -141,7 +162,7 @@ class Model
         }
         $conds = array();
         foreach ($cond_array as $key => $value) {
-            //Todo be more safe check
+            // Todo be more safe check
             if (stripos($key, '.') === false) {
                 $key = " `$key` ";
             }
@@ -151,13 +172,17 @@ class Model
                     if (is_int($k)) {
                         $v          = $this->escape($v);
                         $in_value[] = $v;
-                    } else { //key作为操作符使用
+                    } else { // key 作为操作符使用
                         $k = $this->escape($k);
                         if (is_array($v)) {
                             $v       = implode("','", array_map(array($this, 'escape'), $v));
                             $conds[] = " $key $k ('$v') ";
                         } else {
                             $v       = $this->escape($v);
+                            // escape LIKE value.
+                            if(strtolower($k) == 'like'){
+                                $v = $this->escapeLike($v);
+                            }
                             $conds[] = " $key $k '$v' ";
                         }
                     }
@@ -324,6 +349,13 @@ class Model
         $page = intval($page);
         $page_size = intval($page_size);
         $offset = ($page - 1) * $page_size;
+        if($page_size < 1){
+            throw new Exception('page_size 参数异常～');
+        }
+        if($page < 1){
+            throw new Exception('page 参数异常～');
+        }
+        // TODO maybe limit $page_size ?
         $where_str = $this->getWhereStr($cond_array);
         $order_str = $this->buildOrderStr($order_array);
         $count_sql = "SELECT count(*) FROM `{$this->table}` $where_str ";
