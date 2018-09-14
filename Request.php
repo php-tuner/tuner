@@ -53,7 +53,7 @@ class Request
             $this->base_url .= $_SERVER['REQUEST_URI'];
         }
         // 解析 json 格式的 POST 体
-        if(isset($this->header['Content-Type']) && preg_match('#^application/json;#i', $this->header['Content-Type'])){
+        if (isset($this->header['Content-Type']) && preg_match('#^application/json;#i', $this->header['Content-Type'])) {
             $_POST = json_decode(file_get_contents("php://input"), true);
         }
     }
@@ -242,10 +242,10 @@ class Request
             $format = pathinfo($path, PATHINFO_EXTENSION);
         }
         // detect HTTP_ACCEPT.
-        if(empty($format) && isset($_SERVER['HTTP_ACCEPT'])){
+        if (empty($format) && isset($_SERVER['HTTP_ACCEPT'])) {
             // text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8
             $accept = trim($_SERVER['HTTP_ACCEPT']);
-            if(preg_match('#[^/,]*/([^/,]*)#', $accept, $match)){
+            if (preg_match('#[^/,]*/([^/,]*)#', $accept, $match)) {
                 $index = stripos($match[1], '+');
                 $format = trim($index === false ? $match[1] : substr($match[1], 0, $index));
             }

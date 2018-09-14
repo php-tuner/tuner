@@ -91,7 +91,7 @@ class MysqlDb
     // 提交事务
     public function commit()
     {
-        if(is_null($this->transaction_link)){
+        if (is_null($this->transaction_link)) {
             throw new Exception('you may forgot to call begin.');
         }
         $this->transaction_link->commit();
@@ -101,7 +101,7 @@ class MysqlDb
     // 回滚事务
     public function rollback()
     {
-        if(is_null($this->transaction_link)){
+        if (is_null($this->transaction_link)) {
             throw new Exception('you may forgot to call begin.');
         }
         $this->transaction_link->rollback();

@@ -65,7 +65,7 @@ class RequestCLI
         }
         return isset($this->fake_post[$key]) ? $this->fake_post[$key] : null;
     }
-	
+    
 
     public static function gpc($key = null)
     {

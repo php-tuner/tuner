@@ -68,11 +68,11 @@ class Model
     {
         $args = func_get_args();
         // 兼容旧版支持传递两个参数
-        if(count($args) == 2){
+        if (count($args) == 2) {
             // 第二个参数是数组的话就代表是字段数组
-            if(is_array($args[1])){
+            if (is_array($args[1])) {
                 $fields = $args[1];
-            }else{
+            } else {
                 $table = $args[1];
             }
         }
@@ -80,7 +80,7 @@ class Model
         $table           = $this->escape($table);
         $where_str       = $this->getWhereStr($where_array);
         $fields_str = '*';
-        if($fields){
+        if ($fields) {
             // build it.
             $fields_str = implode(',', array_map(array($this, 'escape'), $fields));
         }
@@ -89,7 +89,7 @@ class Model
     }
 
     // 获取多条记录
-    // getRows($where_array, $table) 
+    // getRows($where_array, $table)
     // or getRows($where_array, $fields, $table)
     public function getRows()
     {
@@ -98,8 +98,8 @@ class Model
     }
 
     // 获取单条记录
-    // getRow($where_array, $table) 
-    // getRow($where_array, $fields = array()) 
+    // getRow($where_array, $table)
+    // getRow($where_array, $fields = array())
     // or getRow($where_array, $fields, $table)
     public function getRow()
     {
@@ -111,9 +111,9 @@ class Model
     // 转义字符
     public function escape($v)
     {
-        // If you wonder why (besides \, ' and ")  
-        // NUL (ASCII 0), \n, \r, and Control-Z are escaped: 
-        // it is not to prevent sql injection, but to 
+        // If you wonder why (besides \, ' and ")
+        // NUL (ASCII 0), \n, \r, and Control-Z are escaped:
+        // it is not to prevent sql injection, but to
         // prevent your sql logfile to get unreadable.
         // \，NUL （ASCII 0），\n，\r，'，" 和 Control-Z.
         $search  = array("\\", "\x00", "\n", "\r", "'", '"', "\x1a");
@@ -122,8 +122,9 @@ class Model
     }
     
     // escape like value.
-    // escape _ (underscore) and % (percent) signs, which have special meanings in LIKE clauses. 
-    public function escapeLike($v){
+    // escape _ (underscore) and % (percent) signs, which have special meanings in LIKE clauses.
+    public function escapeLike($v)
+    {
         return str_replace(array('_', '%'), array('\_', '\%'), $v);
     }
 
@@ -180,7 +181,7 @@ class Model
                         } else {
                             $v       = $this->escape($v);
                             // escape LIKE value.
-                            if(strtolower($k) == 'like'){
+                            if (strtolower($k) == 'like') {
                                 $v = $this->escapeLike($v);
                             }
                             $conds[] = " $key $k '$v' ";
@@ -207,7 +208,7 @@ class Model
         }
         $set_array = array();
         foreach ($data_array as $key => $value) {
-            if(is_scalar($value) == false){
+            if (is_scalar($value) == false) {
                 throw new Exception("{$key} is not scalar.");
             }
             $value       = $this->escape($value);
@@ -349,10 +350,10 @@ class Model
         $page = intval($page);
         $page_size = intval($page_size);
         $offset = ($page - 1) * $page_size;
-        if($page_size < 1){
+        if ($page_size < 1) {
             throw new Exception('page_size 参数异常～');
         }
-        if($page < 1){
+        if ($page < 1) {
             throw new Exception('page 参数异常～');
         }
         // TODO maybe limit $page_size ?
@@ -384,5 +385,4 @@ class Model
         }
         return " ORDER BY ".implode(',', $order_array);
     }
-    
 }

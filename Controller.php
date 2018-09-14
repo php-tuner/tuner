@@ -132,9 +132,10 @@ class Controller
 
     // 格式化模版文件
     // TODO rethink.
-    private function formatTplFile($template_file){
+    private function formatTplFile($template_file)
+    {
         $template_file = trim($template_file);
-        if(empty($template_file)){
+        if (empty($template_file)) {
             return '';
         }
         $detect = new MobileDetect();
@@ -164,7 +165,7 @@ class Controller
     protected function tpl($data = array(), $template_file = '')
     {
         $template_file = trim($template_file);
-        if(empty($template_file)){
+        if (empty($template_file)) {
             $template_file = $this->template_file;
         }
         $template_file = $this->formatTplFile($template_file);
@@ -210,9 +211,9 @@ class Controller
     {
         $format = $this->req->format;
         $class_name = get_class($e);
-        if(in_array($class_name, $this->safe_exception_class)){
+        if (in_array($class_name, $this->safe_exception_class)) {
             $msg    = $e->getMessage();
-        }else{
+        } else {
             // TODO 记录日志（生成唯一表示）
             $id = uniqid('Exception-');
             $msg    = "系统错误($id)～";
