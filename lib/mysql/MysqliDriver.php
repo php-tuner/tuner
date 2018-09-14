@@ -3,7 +3,7 @@
 // Use of this source code is governed by a GPL-3.0
 // license that can be found in the LICENSE file.
 
-class MysqliDriver
+class MysqliDriver extends DbDriver
 {
     private $config     = null;
     private $default_db = null;
@@ -89,10 +89,7 @@ class MysqliDriver
         if (is_object($this->last_link)) {
             return mysqli_real_escape_string($this->last_link, $v);
         }
-        // TODO consider encoding
-        $search  = array("\\", "\x00", "\n", "\r", "'", '"', "\x1a");
-        $replace = array("\\\\", "\\0", "\\n", "\\r", "\'", '\"', "\\Z");
-        return str_replace($search, $replace, $v);
+        return parent::escape($v);
     }
 
     // 连接数据库
@@ -232,5 +229,17 @@ class MysqliDriver
             return current($row);
         }
         return 0;
+    }
+    
+    // get last id
+    public function getInsertId()
+    {
+        return $this->last_link->insert_id;
+    }
+    
+    // affected_rows
+    public function affectedCount()
+    {
+        return $this->last_link->affected_rows;
     }
 }

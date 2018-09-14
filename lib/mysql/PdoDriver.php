@@ -3,9 +3,8 @@
 // Use of this source code is governed by a GPL-3.0
 // license that can be found in the LICENSE file.
 
-class PdoDriver
+class PdoDriver extends DbDriver
 {
-
     private $config     = null;
     private $default_db = null;
 
@@ -106,14 +105,6 @@ class PdoDriver
         }
         $this->transaction_link->rollback();
         $this->transaction_link = null;
-    }
-
-    // 转义字符
-    public function escape($v)
-    {
-        $search  = array("\\", "\x00", "\n", "\r", "'", '"', "\x1a");
-        $replace = array("\\\\", "\\0", "\\n", "\\r", "\'", '\"', "\\Z");
-        return str_replace($search, $replace, $v);
     }
 
     // 连接数据库
@@ -249,5 +240,17 @@ class PdoDriver
             return current($row);
         }
         return 0;
+    }
+    
+    // get last id
+    public function getInsertId()
+    {
+        return $this->last_link->lastInsertId();
+    }
+    
+    // Returns the number of rows affected by the last INSERT, UPDATE, REPLACE or DELETE query.
+    public function affectedCount()
+    {
+        return $this->last_link->rowCount();
     }
 }

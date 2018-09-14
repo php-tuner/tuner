@@ -14,6 +14,7 @@ class Db
         if (!isset($mysql_objs[$key])) {
             // $driver = 'PdoDriver';
             $driver = 'MysqliDriver';
+            require_once(__ROOT_LIB_DIR__."/mysql/DbDriver.php");
             require_once(__ROOT_LIB_DIR__."/mysql/{$driver}.php");
             $mysql_objs[$key] = new $driver($config, $dbname);
         }

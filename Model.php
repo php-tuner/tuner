@@ -9,8 +9,11 @@ class Model
     protected $db    = null;
     protected $table = '';
 
-    public function __construct()
+    // 初始化
+    public function __construct($table = '', $db_name = '', $config_cate = '')
     {
+        $this->db = Db::mysql(Config::mysql($config_cate ? $config_cate : 'default'), $db_name);
+        $this->table = $table;
     }
 
     // 魔法__call
@@ -106,19 +109,6 @@ class Model
         $sql = call_user_func_array(array($this, 'buildSql'), func_get_args());
         $sql .= " LIMIT 1";
         return $this->queryRow($sql);
-    }
-
-    // 转义字符
-    public function escape($v)
-    {
-        // If you wonder why (besides \, ' and ")
-        // NUL (ASCII 0), \n, \r, and Control-Z are escaped:
-        // it is not to prevent sql injection, but to
-        // prevent your sql logfile to get unreadable.
-        // \，NUL （ASCII 0），\n，\r，'，" 和 Control-Z.
-        $search  = array("\\", "\x00", "\n", "\r", "'", '"', "\x1a");
-        $replace = array("\\\\", "\\0", "\\n", "\\r", "\'", '\"', "\\Z");
-        return str_replace($search, $replace, $v);
     }
     
     // escape like value.
@@ -226,7 +216,7 @@ class Model
         $set_str         = $this->getSetStr($sets);
         $sql             = "INSERT INTO `$table` $set_str";
         $re              = $this->query($sql);
-        return $this->lastLink()->lastInsertId();
+        return $this->getInsertId();
     }
     
     // 插入多条记录
@@ -257,7 +247,7 @@ class Model
         $sets = implode("'),('", $sets);
         $sql             = "INSERT INTO `$table` (`$fields`) values ('$sets')";
         $re              = $this->query($sql);
-        return $this->lastLink()->lastInsertId();
+        return $this->getInsertId();
     }
 
     // 更新单条记录
@@ -269,7 +259,7 @@ class Model
         $where_str       = $this->getWhereStr($wheres);
         $sql             = "UPDATE `$table` $set_str $where_str LIMIT 1";
         $re              = $this->query($sql);
-        return $re ? $re->rowCount() : false;
+        return $this->affectedCount();
     }
 
     // 更新多条记录
@@ -292,7 +282,7 @@ class Model
         $where_str       = $this->getWhereStr($wheres);
         $sql             = "DELETE FROM  `$table` $where_str";
         $re              = $this->query($sql);
-        return $re ? $re->rowCount() : false;
+        return $this->affectedCount();
     }
 
     // 删除单条记录
@@ -303,7 +293,7 @@ class Model
         $where_str       = $this->getWhereStr($wheres);
         $sql             = "DELETE FROM `$table` $where_str LIMIT 1";
         $re              = $this->query($sql);
-        return $re ? $re->rowCount() : false;
+        return $this->affectedCount();
     }
 
     // 获取多条记录中制定字段的结果
