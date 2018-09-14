@@ -82,7 +82,7 @@ class Model
         $fields_str = '*';
         if ($fields) {
             // build it.
-            $fields_str = implode(',', array_map(array($this, 'escape'), $fields));
+            $fields_str = implode(', ', array_map(array($this, 'escape'), $fields));
         }
         $sql             = "SELECT $fields_str FROM `$table` $where_str";
         return $sql;

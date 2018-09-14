@@ -36,13 +36,13 @@ class MysqliDriver
     public function closeLinks($type = '')
     {
         if ($type && isset(self::$links[$type])) {
-            if (is_resource(self::$links[$type])) {
+            if (is_object(self::$links[$type])) {
                 self::$links[$type]->close();
             }
             self::$links[$type] = null;
         }
         foreach (self::$links as $link) {
-            if (is_resource($link)) {
+            if (is_object($link)) {
                 $link->close();
             }
             $link = null;
@@ -66,7 +66,7 @@ class MysqliDriver
     // 提交事务
     public function commit()
     {
-        if (!is_resource($this->transaction_link)) {
+        if (!is_object($this->transaction_link)) {
             throw new Exception('you may forgot to call begin.');
         }
         $this->transaction_link->commit();
@@ -76,7 +76,7 @@ class MysqliDriver
     // 回滚事务
     public function rollback()
     {
-        if (!is_resource($this->transaction_link)) {
+        if (!is_object($this->transaction_link)) {
             throw new Exception('you may forgot to call begin.');
         }
         $this->transaction_link->rollback();
@@ -86,7 +86,7 @@ class MysqliDriver
     // 转义字符
     public function escape($v)
     {
-        if (is_resource($this->last_link)) {
+        if (is_object($this->last_link)) {
             return mysqli_real_escape_string($this->last_link, $v);
         }
         // TODO consider encoding
@@ -162,13 +162,11 @@ class MysqliDriver
     private function log($log_str, $type = "error")
     {
         $link = $this->last_link;
-        $info = '';
-        if (is_resource($link)) {
-            $info .= "Server version: {$link->server_info}\n";
-            $info .= "Client library version: {$link->client_info}\n";
-            $info .= "Error: {$link->error}\n";
+        if (is_object($link)) {
+            $log_str = $link->error."($log_str)";
+            //$info .= "Error: {$link->error}\t";
         }
-        Log::file("{$type}\t{$log_str}\n{$info}", "mysql");
+        Log::file("{$type}\t{$log_str}", "mysql");
     }
 
     // 执行SQL
