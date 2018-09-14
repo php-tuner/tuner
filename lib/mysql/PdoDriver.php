@@ -3,7 +3,7 @@
 // Use of this source code is governed by a GPL-3.0
 // license that can be found in the LICENSE file.
 
-class MysqlDb
+class PdoDriver
 {
 
     private $config     = null;
