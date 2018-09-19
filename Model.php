@@ -10,9 +10,11 @@ class Model
     protected $table = '';
 
     // 初始化
-    public function __construct($table = '', $db_name = '', $config_cate = '')
+    public function __construct($table = '', $config_cate = 'default', $db_name = '')
     {
-        $this->db = Db::mysql(Config::mysql($config_cate ? $config_cate : 'default'), $db_name);
+        if($config_cate){
+            $this->db = Db::mysql(Config::mysql($config_cate), $db_name);
+        }
         $this->table = $table;
     }
 

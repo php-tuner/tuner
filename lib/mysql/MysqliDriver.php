@@ -112,24 +112,26 @@ class MysqliDriver extends DbDriver
             return self::$links[$link_key];
         }
         self::$links[$link_key] = null; // destory it
+        
+        /* activate reporting by exception. */
+        $driver = new mysqli_driver();
+        $driver->report_mode = MYSQLI_REPORT_ALL;
+        $driver->reconnect = 1;
+        
         $link = mysqli_init();
         if (!$link) {
-            $this->panic("mysqli_init failed. dsn: $dsn");
-        }
-        // 设置超时时间
-        if (!$link->options(MYSQLI_OPT_CONNECT_TIMEOUT, 3)) {
-            $this->panic("MYSQLI_OPT_CONNECT_TIMEOUT set failed.");
-        }
-        // real connect.
-        if (!$link->real_connect($host, $user, $password, $db_name)) {
-            $this->panic('Connect Error (' . mysqli_connect_errno() . ') '
-            . mysqli_connect_error());
+            $this->panic("mysqli_init failed($dsn).");
         }
         
+        // 设置超时时间
+        $link->options(MYSQLI_OPT_CONNECT_TIMEOUT, 3);
+        
+        // real connect.
+        $link->real_connect($host, $user, $password, $db_name);
+        
         // set charset
-        if (!$link->set_charset('utf8')) {
-            $this->panic("Error loading character set utf8\n");
-        }
+        $link->set_charset('utf8');
+        
         return self::$links[$link_key] = $link;
     }
     
@@ -152,7 +154,7 @@ class MysqliDriver extends DbDriver
     private function panic($msg, $code = 0)
     {
         $this->log($msg);
-        throw new Exception('数据库错误', $code);
+        throw new Exception("数据库错误", $code);
     }
 
     // 记录错误日志
@@ -169,38 +171,40 @@ class MysqliDriver extends DbDriver
     // 执行SQL
     public function query($sql, $force_new = false)
     {
-        $sql = trim($sql);
-        if ($this->transaction_link) {
-            $link = $this->transaction_link;
-        } else {
-            $is_select = preg_match('/^SELECT\s+/i', $sql);
-            // 非事务状态下自动切换主从
-            $link_type = $this->link_type;
-            if (!$link_type) {
-                $link_type = $is_select ? 'slave' : 'master';
+        try{
+            $sql = trim($sql);
+            if ($this->transaction_link) {
+                $link = $this->transaction_link;
+            } else {
+                $is_select = preg_match('/^SELECT\s+/i', $sql);
+                // 非事务状态下自动切换主从
+                $link_type = $this->link_type;
+                if (!$link_type) {
+                    $link_type = $is_select ? 'slave' : 'master';
+                }
+                $link = $this->getRawLink($link_type, $force_new);
             }
-            $link = $this->getRawLink($link_type, $force_new);
-        }
-        $this->last_link = $link;
-        $start_time = microtime(true);
-        
-        $result = $link->query($sql);
-        // should reconnect.
-        if (in_array($link->errno, array(
-            '2006', // MySQL server has gone away
-            '2013', // Lost connection to MySQL server during query
-        ))) {
-            $this->log('try reconnect mysql(ping)');
-            $link->ping();
+            $this->last_link = $link;
+            $start_time = microtime(true);
             $result = $link->query($sql);
+            if ($result == false) {
+                throw new Exception("query failed: $sql");
+            }
+            $used_time  = microtime(true) - $start_time;
+            Log::debug("sql: $sql, time: $used_time sec");
+        }catch(Exception $e){
+            // should reconnect.
+            $code = $e->getCode();
+            if (in_array($code, array(
+                '2006', // MySQL server has gone away
+                '2013', // Lost connection to MySQL server during query
+            ))) {
+                $this->log('try reconnect mysql(ping)');
+                $link->ping();
+                $result = $link->query($sql);
+            }
+            $this->panic($e->getMessage());
         }
-        if ($result == false) {
-            $this->panic("query failed: $sql");
-        }
-        
-        $used_time  = microtime(true) - $start_time;
-        Log::debug("sql: $sql, time: $used_time sec");
-        
         return $result;
     }
 
