@@ -115,7 +115,7 @@ class MysqliDriver extends DbDriver
         
         /* activate reporting by exception. */
         $driver = new mysqli_driver();
-        $driver->report_mode = MYSQLI_REPORT_ALL;
+        $driver->report_mode = MYSQLI_REPORT_STRICT | MYSQLI_REPORT_ERROR;
         $driver->reconnect = 1;
         
         $link = mysqli_init();
