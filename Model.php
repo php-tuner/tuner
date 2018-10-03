@@ -81,11 +81,13 @@ class Model
                 $table = $args[1];
             }
         }
-        $table || $table = $this->table;
+        if(empty($table)){
+            $table = $this->table;
+        }
         $table           = $this->escape($table);
         $where_str       = $this->getWhereStr($where_array);
         $fields_str = '*';
-        if ($fields) {
+        if (!empty($fields)) {
             // build it.
             $fields_str = implode(', ', array_map(array($this, 'escape'), $fields));
         }
