@@ -160,11 +160,11 @@ class MysqliDriver extends DbDriver
     // 记录错误日志
     private function log($log_str, $type = "error")
     {
-        $link = $this->last_link;
-        if (is_object($link)) {
-            $log_str = $link->error."($log_str)";
-            //$info .= "Error: {$link->error}\t";
-        }
+        // $link = $this->last_link;
+        // if (is_object($link)) {
+        //     $log_str = $link->error."($log_str)";
+        //     //$info .= "Error: {$link->error}\t";
+        // }
         Log::file("{$type}\t{$log_str}", "mysql");
     }
 
@@ -203,7 +203,7 @@ class MysqliDriver extends DbDriver
                 $link->ping();
                 $result = $link->query($sql);
             }
-            $this->panic($e->getMessage());
+            $this->panic($e->getMessage()." sql: $sql");
         }
         return $result;
     }
