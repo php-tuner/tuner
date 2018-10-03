@@ -69,7 +69,7 @@ class Model
     }
     
     // 构建 SQL 语句
-    protected function buildSql($where_array, $fields = array(), $table = '')
+    protected function buildSql($where_array)
     {
         $args = func_get_args();
         // 兼容旧版支持传递两个参数
@@ -173,9 +173,9 @@ class Model
                         } else {
                             $v       = $this->escape($v);
                             // escape LIKE value.
-                            if (strtolower($k) == 'like') {
-                                $v = $this->escapeLike($v);
-                            }
+                            // if (strtolower($k) == 'like') {
+                            //     $v = $this->escapeLike($v);
+                            // }
                             $conds[] = " $key $k '$v' ";
                         }
                     }
