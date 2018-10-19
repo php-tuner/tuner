@@ -15,6 +15,14 @@ class Model
         if($config_cate){
             $this->db = Db::mysql(Config::mysql($config_cate), $db_name);
         }
+        // auto check table name from subclass name.
+        if(empty($table)){
+            $obj_name = get_class($this);
+            $obj_name = substr($obj_name, 0, -5);
+            if($obj_name){
+                $table = strtolower(trim(preg_replace('/[A-Z]/', '_\0', $obj_name), '_'));
+            }
+        }
         $this->table = $table;
     }
 
@@ -89,6 +97,7 @@ class Model
         $fields_str = '*';
         if (!empty($fields)) {
             // build it.
+            $fields = array_filter($fields);
             $fields_str = implode(', ', array_map(array($this, 'escape'), $fields));
         }
         $sql             = "SELECT $fields_str FROM `$table` $where_str";

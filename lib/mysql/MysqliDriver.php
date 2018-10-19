@@ -51,16 +51,16 @@ class MysqliDriver extends DbDriver
     }
 
     // 开启事务
-    public function begin($flags, $name)
+    public function begin()
     {
-        $this->transaction_link = $this->getRawLink('master', true, $options);
-        if (!$this->transaction_link->beginTransaction($flags, $name)) {
-            $this->panic("beginTransaction failed.");
-        }
-        // close autocommit.
-        // if(!$this->transaction_link->autocommit(false)){
-        //     $this->panic("close autocommit failed.");
+        $this->transaction_link = $this->getRawLink('master');
+        // if (!$this->transaction_link->beginTransaction($flags, $name)) {
+        //     $this->panic("beginTransaction failed.");
         // }
+        // close autocommit.
+        if(!$this->transaction_link->autocommit(false)){
+            $this->panic("close autocommit failed.");
+        }
     }
 
     // 提交事务
