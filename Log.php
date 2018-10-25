@@ -63,6 +63,7 @@ class Log
     // 日志写到文件中
     public static function file($str, $dir = 'common', $rotate_type = 'day')
     {
+        self::debug($str);
         // 不是绝对目录,作为子目录处理
         if (stripos($dir, '/') !== 0) {
             $base_dir = Config::site('log_dir');

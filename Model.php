@@ -12,14 +12,14 @@ class Model
     // 初始化
     public function __construct($table = '', $config_cate = 'default', $db_name = '')
     {
-        if($config_cate){
+        if ($config_cate) {
             $this->db = Db::mysql(Config::mysql($config_cate), $db_name);
         }
         // auto check table name from subclass name.
-        if(empty($table)){
+        if (empty($table)) {
             $obj_name = get_class($this);
             $obj_name = substr($obj_name, 0, -5);
-            if($obj_name){
+            if ($obj_name) {
                 $table = strtolower(trim(preg_replace('/[A-Z]/', '_\0', $obj_name), '_'));
             }
         }
@@ -89,7 +89,7 @@ class Model
                 $table = $args[1];
             }
         }
-        if(empty($table)){
+        if (empty($table)) {
             $table = $this->table;
         }
         $table           = $this->escape($table);
@@ -111,6 +111,83 @@ class Model
     {
         $sql = call_user_func_array(array($this, 'buildSql'), func_get_args());
         return $this->queryRows($sql);
+    }
+
+    // fetch result row count.
+    public function countResult($opt)
+    {
+        $opt['count'] = 1;
+        $opt['field'] = array('count(*) as total');
+        $row = $this->fetchRow($opt);
+        return empty($row) ? 0 : intval($row['total']);
+    }
+
+    // fetch Row
+    public function fetchRow($opt)
+    {
+        $opt['count'] = 1;
+        $rows = $this->fetchRows($opt);
+        return empty($rows) ? array() : current($rows);
+    }
+
+    // fetch Rows
+    public function fetchRows($opt)
+    {
+        // check array
+        $this->checkArray($opt, array(
+            'where' => array(),
+            'order' => array(),
+            'count' => 10,
+            'offset' => 0,
+            'table' => '',
+            'field' => array(),
+        ));
+        
+        if (empty($opt['where'])) {
+            $where_str = '';
+        } else {
+            $where_array = $opt['where'];
+            $where_str  = $this->getWhereStr($where_array);
+        }
+        
+        if (empty($opt['field'])) {
+            $fields_str = '*';
+        } else {
+            $fields = array_filter($opt['field']);
+            $fields_str = implode(', ', array_map(array($this, 'escape'), $fields));
+        }
+                
+        $table = empty($opt['table']) ? $this->table : trim($opt['table']);
+        
+        // build sql
+        $sql = "SELECT $fields_str FROM `$table` $where_str";
+        
+        // add order
+        if (!empty($opt['order'])) {
+            $sql .= $this->buildOrderStr($opt['order']);
+        }
+        
+        // add limit
+        if (!empty($opt['count'])) {
+            $offset = empty($opt['offset']) ? 0 : $opt['offset'];
+            $sql .= " LIMIT {$offset}, {$opt['count']}";
+        }
+        return $this->queryRows($sql);
+    }
+
+    // check Array
+    private function checkArray($array, $default_array)
+    {
+        foreach ($array as $k => $v) {
+            if (!isset($default_array[$k])) {
+                throw new Exception("'$k' is not allowed in array.");
+            }
+            $want_type = gettype($default_array[$k]);
+            $got_type = gettype($v);
+            if ($got_type !== $want_type) {
+                throw new Exception("$k should be a $want_type");
+            }
+        }
     }
 
     // 获取单条记录
@@ -284,7 +361,7 @@ class Model
         $where_str       = $this->getWhereStr($wheres);
         $sql             = "UPDATE `$table` $set_str $where_str";
         $re              = $this->query($sql);
-        return $re ? $re->rowCount() : false;
+        return $this->affectedCount();
     }
 
     // 删除多条记录
@@ -312,19 +389,21 @@ class Model
     // 获取多条记录中制定字段的结果
     public function getValues($rows, $fields = array())
     {
-        if (empty($rows)) {
-            return array();
-        }
         if (!is_array($fields)) {
             $fields = array($fields);
         }
         $re = array();
-        foreach ($rows as $row) {
-            foreach ($fields as $f) {
-                if (!is_string($f) || !isset($row[$f])) {
-                    continue;
+        foreach ($fields as $f) {
+            $re[$f] = array();
+        }
+        if (!empty($rows)) {
+            foreach ($rows as $row) {
+                foreach ($fields as $f) {
+                    if (!is_string($f) || !isset($row[$f])) {
+                        continue;
+                    }
+                    $re[$f][] = $row[$f];
                 }
-                $re[$f][] = $row[$f];
             }
         }
         return count($re) > 1 ? $re : current($re);
@@ -383,7 +462,7 @@ class Model
     // 构建排序语句
     protected function buildOrderStr($order_array)
     {
-        if (!$order_array) {
+        if (empty($order_array)) {
             return '';
         }
         return " ORDER BY ".implode(',', $order_array);

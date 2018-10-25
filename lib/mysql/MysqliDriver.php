@@ -51,16 +51,17 @@ class MysqliDriver extends DbDriver
     }
 
     // 开启事务
-    public function begin()
+    public function begin($flags = 0, $name = 'transation')
     {
         $this->transaction_link = $this->getRawLink('master');
-        // if (!$this->transaction_link->beginTransaction($flags, $name)) {
-        //     $this->panic("beginTransaction failed.");
-        // }
         // close autocommit.
         if(!$this->transaction_link->autocommit(false)){
             $this->panic("close autocommit failed.");
         }
+        if (!$this->transaction_link->begin_transaction($flags, $name)) {
+            $this->panic("beginTransaction failed.");
+        }
+        
     }
 
     // 提交事务
@@ -70,6 +71,7 @@ class MysqliDriver extends DbDriver
             throw new Exception('you may forgot to call begin.');
         }
         $this->transaction_link->commit();
+        $this->transaction_link->autocommit(true);
         $this->transaction_link = null;
     }
 
@@ -80,6 +82,7 @@ class MysqliDriver extends DbDriver
             throw new Exception('you may forgot to call begin.');
         }
         $this->transaction_link->rollback();
+        $this->transaction_link->autocommit(true);
         $this->transaction_link = null;
     }
 
@@ -226,11 +229,22 @@ class MysqliDriver extends DbDriver
         return $array;
     }
 
+    // DEPRECTED.
     public function queryFirst($sql)
     {
         $row = $this->queryRow($sql);
         if (is_array($row)) {
             return current($row);
+        }
+        return 0;
+    }
+    
+    // query count.
+    public function queryCount($sql)
+    {
+        $row = $this->queryRow($sql);
+        if (is_array($row)) {
+            return intval(current($row));
         }
         return 0;
     }
