@@ -9,6 +9,24 @@ class Http
     // 默认User-Agent
     public static $UA = "HTTP CLIENT(PHP)";
 
+    // build url
+    public static function buildUrl($url, $params = array())
+    {
+        $url = trim($url);
+        if(empty($params)){
+            return $url;
+        }
+        if(!is_array($params)){
+            throw new Exception('params is not array.');
+        }
+        $url = rtrim($url, '?');
+        $query_string = http_build_query($params, '', '&');
+        if(strpos($url, '?') === false){
+            return $url.'?'.$query_string;
+        }
+        return $url.'&'.$query_string;
+    }
+
     // 获取处理器
     public static function getHandler()
     {
@@ -76,14 +94,14 @@ class Http
     }
 
     // GET请求
-    public static function get($url, $headers = array(), $connect_timeout = 1, $read_timeout = 1)
+    public static function get($url, $headers = array(), $connect_timeout = 5, $read_timeout = 5)
     {
         $handler = self::getHandler();
         return self::$handler($url, null, $headers, true, $connect_timeout, $read_timeout);
     }
 
     // POST请求
-    public static function post($url, $params = array(), $headers = array(), $connect_timeout = 1, $read_timeout = 1)
+    public static function post($url, $params = array(), $headers = array(), $connect_timeout = 5, $read_timeout = 5)
     {
         $handler = self::getHandler();
         return self::$handler($url, $params, $headers, true, $connect_timeout, $read_timeout);
@@ -352,7 +370,7 @@ class Http
                 $body   = $info['header_size'] && $result ? substr($result, $info['header_size']) : null;
                 if ($error || !in_array($info['http_code'], array(200))) {
                     $rtn = new HttpResponse('', '', $body, new Exception("url:{$info['url']}, error:$error, info:" . print_r($info, true)));
-                    //throw new Exception($error);
+                    // throw new Exception($error);
                 } else {
                     list($http_line, $header_lines) = explode("\n", substr($result, 0, $info['header_size']), 2);
                     $http_status  = array();
@@ -451,7 +469,7 @@ class HttpResponse
         if (get_class($this->error) == 'Exception') {
             return $this->error->getMessage();
         }
-        //maybe wrong
+        // maybe wrong
         return @strval($this->error);
     }
 
