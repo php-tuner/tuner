@@ -54,6 +54,14 @@ date_default_timezone_set('Etc/GMT-8');
 // 基于 socket 的流的默认超时时间(秒)
 ini_set('default_socket_timeout', 30);
 
+// Enable display errors.
+if (TUNER_MODE != 'online' || RUN_MODEL == 'CLI') {
+    ini_set('display_errors', 1);
+    error_reporting(E_ALL);
+}else{
+    ini_set('display_errors', 0);
+}
+
 // 类的默认加载
 spl_autoload_register(_createLoader_(array(
     'controller' => array(
