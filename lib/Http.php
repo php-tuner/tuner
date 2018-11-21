@@ -10,9 +10,10 @@ class Http
     public static $UA = "HTTP CLIENT(PHP)";
 
     // build url
-    public static function buildUrl($url, $params = array())
+    public static function buildUrl($url, $params = array(), $fragment = '')
     {
         $url = trim($url);
+        $fragment = trim($fragment);
         if(empty($params)){
             return $url;
         }
@@ -21,6 +22,9 @@ class Http
         }
         $url = rtrim($url, '?');
         $query_string = http_build_query($params, '', '&');
+        if(!empty($fragment)){
+            $query_string .= "#{$fragment}";
+        }
         if(strpos($url, '?') === false){
             return $url.'?'.$query_string;
         }

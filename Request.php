@@ -185,30 +185,20 @@ class Request
         }
     }
 
-    //获取客户端IP
+    // 获取客户端IP
     public static function getClientIp()
     {
-        if ($_SERVER) {
-            if (isset($_SERVER["HTTP_X_FORWARDED_FOR"])) {
-                return $_SERVER["HTTP_X_FORWARDED_FOR"];
-            } elseif (isset($_SERVER["HTTP_CLIENT_IP"])) {
-                return $_SERVER["HTTP_CLIENT_IP"];
-            } elseif (isset($_SERVER["REMOTE_ADDR"])) {
-                return $_SERVER["REMOTE_ADDR"];
-            } else {
-                return 'no client ip';
-            }
-        } else {
-            if (getenv('HTTP_X_FORWARDED_FOR')) {
-                return getenv('HTTP_X_FORWARDED_FOR');
-            } elseif (getenv('HTTP_CLIENT_IP')) {
-                return getenv('HTTP_CLIENT_IP');
-            } elseif (getenv('REMOTE_ADDR')) {
-                return getenv('REMOTE_ADDR');
-            } else {
-                return 'no client ip';
-            }
-        }
+        $ip = 'no client ip';
+        if (!empty($_SERVER["HTTP_X_FORWARDED_FOR"])) {
+            $ip = $_SERVER["HTTP_X_FORWARDED_FOR"];
+        } elseif (!empty($_SERVER["HTTP_CLIENT_IP"])) {
+            $ip = $_SERVER["HTTP_CLIENT_IP"];
+        } elseif (!empty($_SERVER["REMOTE_ADDR"])) {
+            $ip = $_SERVER["REMOTE_ADDR"];
+        } elseif ($ip = getenv('HTTP_X_FORWARDED_FOR')) {
+        } elseif ($ip = getenv('HTTP_CLIENT_IP')) {
+        } elseif ($ip = getenv('REMOTE_ADDR')) {}
+        return $ip;
     }
 
     // 获取所有的HEADER

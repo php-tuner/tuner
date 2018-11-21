@@ -80,14 +80,19 @@ class Model
     protected function buildSql($where_array)
     {
         $args = func_get_args();
-        // 兼容旧版支持传递两个参数
-        if (count($args) == 2) {
-            // 第二个参数是数组的话就代表是字段数组
-            if (is_array($args[1])) {
+        switch(count($args)){
+            case 2: // 兼容旧版支持传递两个参数
+                // 第二个参数是数组的话就代表是字段数组
+                if (is_array($args[1])) {
+                    $fields = $args[1];
+                } else {
+                    $table = $args[1];
+                }
+            break;
+            case 3:
                 $fields = $args[1];
-            } else {
-                $table = $args[1];
-            }
+                $table = $args[2];
+            break;
         }
         if (empty($table)) {
             $table = $this->table;
@@ -410,7 +415,7 @@ class Model
     }
 
     // 格式化多条记录为以指定字段为 key 的形式
-    public function formatRows($rows, $field)
+    public function formatRows($rows, $field, $one_to_many = false)
     {
         if (!is_array($rows)) {
             return $rows;
@@ -421,7 +426,11 @@ class Model
                 //skip
                 continue;
             }
-            $re[$row[$field]] = $row;
+            if($one_to_many){
+                $re[$row[$field]][] = $row;
+            }else{
+                $re[$row[$field]] = $row;
+            }
         }
         return $re;
     }

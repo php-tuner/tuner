@@ -10,17 +10,18 @@ class Xml
     // covert xml string to array
     // option https://github.com/gaarf/XML-string-to-PHP-array/blob/master/xmlstr_to_array.php ?
     public static function toArray($xml_string)
-    {
+    {        
         $xml_string = trim($xml_string);
         if(empty($xml_string)){
             return array();
         }
+        libxml_disable_entity_loader(true);
         $xml = simplexml_load_string($xml_string, "SimpleXMLElement", LIBXML_NOCDATA);
         if($xml === false){
             throw new Exception('covert faild.');
         }
         $json = json_encode($xml);
-        return json_decode($json,TRUE);
+        return json_decode($json, true);
     }
 
     /**
