@@ -58,6 +58,12 @@ class Request
         }
     }
     
+    // get request input.
+    public static function getInput()
+    {
+        return file_get_contents('php://input');
+    }
+    
     // 检测是否是https请求
     public static function isHttps()
     {

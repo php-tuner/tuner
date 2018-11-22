@@ -11,7 +11,7 @@
 class Cache
 {
 
-    //获取默认的缓存
+    // 获取默认的缓存
     public static function getDefault()
     {
         $cache_handler = ucwords(strtolower(Config::common('cache')));
@@ -32,7 +32,7 @@ class Cache
         return "__META__" . md5($key);
     }
 
-    //缓存函数执行结果
+    // 缓存函数执行结果
     public static function call($callback, $params, $cache_time = 300)
     {
         $cache_key  = md5(serialize($callback) . serialize($params));
@@ -45,7 +45,7 @@ class Cache
         return $re;
     }
 
-    //设置缓存数据(防雪崩)
+    // 设置缓存数据(防雪崩)
     public static function setData($key, $value, $expire_time = 300)
     {
         $now_time         = time();
@@ -60,7 +60,7 @@ class Cache
         return self::set($key, $value, $fake_expire_time);
     }
 
-    //缓存数据(防雪崩)
+    // 缓存数据(防雪崩)
     public static function getData($key)
     {
         $meta_key  = self::getMetaKey($key);
@@ -75,7 +75,7 @@ class Cache
         return self::get($key);
     }
 
-    //设置缓存数据
+    // 设置缓存数据
     public static function set($key, $value, $expire_time = 300)
     {
         $cache = self::getDefault();
@@ -91,7 +91,7 @@ class Cache
         throw new Exception("没有可用的缓存服务");
     }
 
-    //获取缓存数据
+    // 获取缓存数据
     public static function get($key)
     {
         $cache = self::getDefault();
@@ -107,7 +107,7 @@ class Cache
         return false;
     }
 
-    //memcached
+    // memcached
     public static function memcached($servers = array())
     {
         static $mcd_list = array();
@@ -127,7 +127,7 @@ class Cache
         return $mcd_list[$key];
     }
 
-    //memcache
+    // memcache
     public static function memcache($servers = array())
     {
         static $mc_list = array();
