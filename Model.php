@@ -206,6 +206,14 @@ class Model
         return $this->queryRow($sql);
     }
     
+    // get lock row.
+    public function getLockRow()
+    {
+        $sql = call_user_func_array(array($this, 'buildSql'), func_get_args());
+        $sql .= " FOR UPDATE";
+        return $this->queryRow($sql);
+    }
+    
     // escape like value.
     // escape _ (underscore) and % (percent) signs, which have special meanings in LIKE clauses.
     public function escapeLike($v)

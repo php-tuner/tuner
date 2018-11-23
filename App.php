@@ -136,7 +136,9 @@ class App
                     }
                     // 分隔符也许可以定制
                     $c->setTplFile(Helper::dir($sub_dir, $controller, $action).'.html');
-                    $action = str_replace(' ', '', ucwords(str_replace(CAMEL_CLASS_SEP, ' ', $action)));
+                    $action = '_'.str_replace(CAMEL_CLASS_SEP, ' ', $action);
+                    $action = str_replace(' ', '', ucwords($action));
+                    $action = ltrim($action, '_');
                     if (!method_exists($c, $action)) {
                         throw new Exception("not found(action: $action)", 404);
                     }

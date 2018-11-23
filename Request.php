@@ -58,6 +58,26 @@ class Request
         }
     }
     
+    // 构建URL
+    protected function buildUrl($uri, $params = array())
+    {
+        $base_url = $this->base_url;
+        $base_url = rtrim($base_url, '/');
+        $uri      = ltrim($uri, '/');
+        $url      = "{$base_url}/$uri";
+        if (!$params) {
+            return $url;
+        }
+        if (stripos($url, '?') === false) {
+            $url .= "?";
+        }
+        if (substr($url, -1) != '?') {
+            $url .= "&";
+        }
+        $query_string = http_build_query($params, '', '&');
+        return $url . $query_string;
+    }
+    
     // get request input.
     public static function getInput()
     {
@@ -86,7 +106,7 @@ class Request
         return call_user_func_array(array($obj, $method), $args);
     }
 
-    //获取原始的请求体
+    // 获取原始的请求体
     public static function getRawBody()
     {
         $body = null;
@@ -109,7 +129,7 @@ class Request
         return $body;
     }
 
-    //构建请求
+    // 构建请求
     public static function buildMultipartFormData($assoc, $files, &$boundary = '')
     {
         // invalid characters for "name" and "filename"
