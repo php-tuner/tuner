@@ -139,7 +139,9 @@ class Response
     public function json($data, $charset = 'UTF-8')
     {
         $charset || $charset = $this->charset;
-        $data                = is_string($data) ? $data : json_encode($data);
+        if(!is_string($data)){
+            $data = json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+        }
         $this->addHeader("Content-Type: application/json; charset={$charset}");
         $this->addHeader("Cache-Control: no-cache, must-revalidate");
         $this->addHeader("Pragma: no-cache");

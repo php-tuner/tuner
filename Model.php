@@ -257,8 +257,11 @@ class Model
         $conds = array();
         foreach ($cond_array as $key => $value) {
             // Todo be more safe check
-            if (stripos($key, '.') === false) {
-                $key = " `$key` ";
+            // if (stripos($key, '.') === false) {
+            //     $key = " `$key` ";
+            // }
+            if(preg_match('/\s/i', $key)){
+                throw new Exception('key is ilegal!');
             }
             if (is_array($value)) {
                 $in_value = array();
@@ -449,7 +452,7 @@ class Model
         $page = intval($page);
         $page_size = intval($page_size);
         $offset = ($page - 1) * $page_size;
-        if ($page_size < 1) {
+        if ($page_size < 1) {            
             throw new Exception('page_size 参数异常～');
         }
         if ($page < 1) {
