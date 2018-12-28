@@ -229,8 +229,8 @@ class Request
         }
         
         // multi ip 
-        if(preg_match("/[\d\.]{7,15}/", $ip, $ipMatches)){
-            return $ipMatches[0];
+        if(preg_match("/[\d\.]{7,15}/", $ip, $matches)){
+            return $matches[0];
         }
         return $ip;
     }
