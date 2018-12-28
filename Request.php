@@ -214,7 +214,6 @@ class Request
     // 获取客户端IP
     public static function getClientIp()
     {
-        $ip = 'no client ip';
         if (!empty($_SERVER["HTTP_X_FORWARDED_FOR"])) {
             $ip = $_SERVER["HTTP_X_FORWARDED_FOR"];
         } elseif (!empty($_SERVER["HTTP_CLIENT_IP"])) {
@@ -224,6 +223,15 @@ class Request
         } elseif ($ip = getenv('HTTP_X_FORWARDED_FOR')) {
         } elseif ($ip = getenv('HTTP_CLIENT_IP')) {
         } elseif ($ip = getenv('REMOTE_ADDR')) {}
+        
+        if(empty($ip)){
+            return '';
+        }
+        
+        // multi ip 
+        if(preg_match("/[\d\.]{7,15}/", $ip, $ipMatches)){
+            return $ipMatches[0];
+        }
         return $ip;
     }
 
