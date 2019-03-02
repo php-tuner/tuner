@@ -92,7 +92,7 @@ class Log
         }
         $filename .= ".txt";
         $filepath = Helper::dir($dir, $filename);
-        if(!is_writeable($filepath)){
+        if(file_exists($filepath) && !is_writeable($filepath)){
             throw new Exception("Log failed: not writeable.");
         }
         $str      = trim(self::getVarString($str));
