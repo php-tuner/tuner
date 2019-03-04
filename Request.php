@@ -158,7 +158,7 @@ class Request
                 case false === $filepath = realpath(filter_var($filepath)):
                 case !is_file($filepath):
                 case !is_readable($filepath):
-                    continue; // or return false, throw new InvalidArgumentException
+                    continue 2; // or return false, throw new InvalidArgumentException
             }
             $data     = file_get_contents($filepath);
             $filename = call_user_func("end", explode(DIRECTORY_SEPARATOR, $filename));

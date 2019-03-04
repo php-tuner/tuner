@@ -21,6 +21,9 @@ define('RUN_MODEL', isset($_SERVER['REQUEST_METHOD']) || isset($_SERVER['HTTP_HO
 
 $app_root_dir = dirname(realpath($_SERVER['SCRIPT_FILENAME']));
 
+// 公开目录(此目录文件可以被外部请求访问到)
+defined('APP_PUBLIC_DIR') || define('APP_PUBLIC_DIR', $app_root_dir);
+
 // 应用程序的根目录
 defined('APP_ROOT_DIR') || define('APP_ROOT_DIR', TUNER_VERSION >= 1 ? dirname($app_root_dir) : $app_root_dir);
 

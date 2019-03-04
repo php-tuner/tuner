@@ -59,9 +59,10 @@ class App
                 if (!$route_path) {
                     $route_path = preg_replace('/\?(.*)/i', '', $req->route_uri);
                 }
-                $route_file_path = realpath(Helper::dir(APP_ROOT_DIR, $route_path));
+                $route_file_path = realpath(Helper::dir(APP_PUBLIC_DIR, $route_path));
                 // 静态文件目录，直接输出内容
-                if (preg_match('#^/public/#', $route_path) && is_file($route_file_path)) {
+                // TODO 限制扩展名
+                if (is_file($route_file_path)) {
                     $res->file($route_file_path);
                     return true;
                 }

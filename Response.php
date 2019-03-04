@@ -342,7 +342,7 @@ class Response
             'ods'  => 'application/vnd.oasis.opendocument.spreadsheet',
         );
 
-        $ext = strtolower(array_pop(explode('.', $filename)));
+        $ext = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
         if (array_key_exists($ext, $mime_types)) {
             return $mime_types[$ext];
         } elseif (function_exists('finfo_open')) {
