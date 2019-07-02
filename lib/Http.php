@@ -371,15 +371,22 @@ class Http
                 $error = curl_error($done["handle"]);
                 //wrong may be still have body data
                 $result = curl_multi_getcontent($done["handle"]);
-                $body   = $info['header_size'] && $result ? substr($result, $info['header_size']) : null;
-                if ($error || !in_array($info['http_code'], array(200))) {
-                    $rtn = new HttpResponse('', '', $body, new Exception("url:{$info['url']}, error:$error, info:" . print_r($info, true)));
-                    // throw new Exception($error);
-                } else {
+                
+                $http_status  = array();
+                $body = null;
+                $headers = array();
+                
+                if(!empty($info['header_size']) && $result){
+                    $body   = substr($result, $info['header_size']);
                     list($http_line, $header_lines) = explode("\n", substr($result, 0, $info['header_size']), 2);
-                    $http_status  = array();
                     $headers      = self::parseHeaders($header_lines);
                     list($http_status['version'], $http_status['code'], $http_status['desc']) = explode(' ', trim($http_line));
+                }
+                
+                if ($error || !in_array($info['http_code'], array(200))) {
+                    $rtn = new HttpResponse($http_status, $headers, $body, new Exception("url:{$info['url']}, error:$error, info:" . print_r($info, true)));
+                    // throw new Exception($error);
+                } else {
                     // compact('info', 'error', 'result');
                     $rtn = new HttpResponse($http_status, $headers, $body);
                 }
@@ -465,6 +472,18 @@ class HttpResponse
             return end($val);
         }
         return $val;
+    }
+
+    // get status
+    public function getStatus()
+    {
+        return $this->status;
+    }
+    
+    // get http code
+    public function getHttpCode()
+    {
+        return empty($this->status['code']) ? '' : $this->status['code'];
     }
 
     // 获取错误信息
