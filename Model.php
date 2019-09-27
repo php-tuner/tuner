@@ -16,14 +16,17 @@ class Model
             $this->db = Db::mysql(Config::mysql($config_cate), $db_name);
         }
         // auto check table name from subclass name.
-        if (empty($table)) {
+        if (empty($table) && empty($this->table)) {
             $obj_name = get_class($this);
             $obj_name = substr($obj_name, 0, -5);
             if ($obj_name) {
                 $table = strtolower(trim(preg_replace('/[A-Z]/', '_\0', $obj_name), '_'));
             }
         }
-        $this->table = $table;
+        
+        if(! empty($table)) {
+            $this->table = $table;
+        }
     }
 
     // 魔法__call
