@@ -14,6 +14,7 @@ class MysqliDriver extends DbDriver
     
     private $last_link = null;
     private $transaction_link = null;
+    private $last_query_sql = '';
 
     private static $links = array();
 
@@ -171,6 +172,10 @@ class MysqliDriver extends DbDriver
         Log::file("{$type}\t{$log_str}", "mysql");
     }
 
+    public function getLastQuery(){
+        return $this->last_query_sql;
+    }
+
     // 执行SQL
     public function query($sql, $force_new = false)
     {
@@ -190,6 +195,7 @@ class MysqliDriver extends DbDriver
             $this->last_link = $link;
             $start_time = microtime(true);
             $result = $link->query($sql);
+            $this->last_query_sql = $sql;
             if ($result == false) {
                 throw new Exception("query failed: $sql");
             }

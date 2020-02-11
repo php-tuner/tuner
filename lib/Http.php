@@ -7,7 +7,8 @@
 class Http
 {
     // 默认User-Agent
-    public static $UA = "HTTP CLIENT(PHP)";
+    // public static $UA = "HTTP CLIENT(PHP)";
+    public static $UA = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.130 Safari/537.36';
 
     // build url
     public static function buildUrl($url, $params = array(), $fragment = '')
@@ -368,6 +369,7 @@ class Http
             while ($done = curl_multi_info_read($chs)) {
                 //http://php.net/curl_getinfo
                 $info  = curl_getinfo($done["handle"]);
+                
                 $error = curl_error($done["handle"]);
                 //wrong may be still have body data
                 $result = curl_multi_getcontent($done["handle"]);
@@ -380,7 +382,11 @@ class Http
                     $body   = substr($result, $info['header_size']);
                     list($http_line, $header_lines) = explode("\n", substr($result, 0, $info['header_size']), 2);
                     $headers      = self::parseHeaders($header_lines);
-                    list($http_status['version'], $http_status['code'], $http_status['desc']) = explode(' ', trim($http_line));
+                    $http_info = explode(' ', trim($http_line));
+                    $http_status['version'] = empty($http_info[0]) ? '' : $http_info[0];
+                    $http_status['code']    = empty($http_info[1]) ? '' : $http_info[1];
+                    $http_status['desc']    = empty($http_info[2]) ? '' : $http_info[2];
+                    
                 }
                 
                 if ($error || !in_array($info['http_code'], array(200))) {
@@ -388,7 +394,7 @@ class Http
                     // throw new Exception($error);
                 } else {
                     // compact('info', 'error', 'result');
-                    $rtn = new HttpResponse($http_status, $headers, $body);
+                    $rtn = new HttpResponse($http_status, $headers, $body, null, $info['url']);
                 }
                 if (is_callable($callback)) {
                     $callback($rtn);
@@ -437,8 +443,9 @@ class HttpResponse
     public $header = array();
     public $body   = '';
     public $error  = null;
+    private $url    = '';
 
-    public function __construct($status, $header, $body, $error = null)
+    public function __construct($status, $header, $body, $error = null, $url = '')
     {
         $charset = '';
         if (isset($header['Content-Type'])) {
@@ -448,13 +455,17 @@ class HttpResponse
                 $charset = $match[1];
             }
         }
+        
         if ($charset && strtoupper($charset) != 'UTF-8') {
             $body = mb_convert_encoding($body, 'UTF-8', $charset);
         }
+        
         $this->status = $status;
         $this->header = $header;
         $this->body   = $body;
         $this->error  = $error;
+        $this->url    = $url;
+        
         if ($error != null) {
             Log::file($this->error(), 'http_request');
         }
@@ -467,10 +478,12 @@ class HttpResponse
         if (!isset($this->header[$key])) {
             return '';
         }
+        
         $val = $this->header[$key];
         if (is_array($val) && $single) {
             return end($val);
         }
+        
         return $val;
     }
 
@@ -502,6 +515,22 @@ class HttpResponse
         return json_decode($this->body, true);
     }
     
+    // 将返回内容解析为 xml 数组
+    public function xmlToArray()
+    {
+        $xml_string = trim($this->body);
+        if(empty($xml_string)){
+            return array();
+        }
+        libxml_disable_entity_loader(true);
+        $xml = simplexml_load_string($xml_string, "SimpleXMLElement", LIBXML_NOCDATA);
+        if($xml === false){
+            throw new Exception('covert faild.');
+        }
+        $json = json_encode($xml);
+        return json_decode($json, true);
+    }
+    
     // 获取原始返回内容
     public function raw()
     {
@@ -511,5 +540,10 @@ class HttpResponse
     public function _toString()
     {
         return $this->body;
+    }
+    
+    public function getUrl()
+    {
+        return $this->url;
     }
 }

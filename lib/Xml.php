@@ -31,7 +31,7 @@ class Xml
      * @param string $root_node
      * @return string $xml
      */
-    public function encodeObj($obj, $root_node = 'response', $encoding = "utf-8")
+    public static function encodeObj($obj, $root_node = 'response', $encoding = "utf-8")
     {
         $xml = "<?xml version=\"1.0\" encoding=\"{$encoding}\"?>" . PHP_EOL;
         $xml .= self::encode($obj, $root_node, $depth = 0);
@@ -46,7 +46,7 @@ class Xml
      * @param int $depth Used for indentation
      * @return string $xml
      */
-    private function encode($data, $node, $depth)
+    public static function encode($data, $node, $depth = 0)
     {
         $xml = str_repeat("\t", $depth);
         $xml .= "<{$node}>" . PHP_EOL;
@@ -55,7 +55,11 @@ class Xml
                 $xml .= self::encode($val, $key, ($depth + 1));
             } else {
                 $xml .= str_repeat("\t", ($depth + 1));
-                $xml .= "<{$key}>" . htmlspecialchars($val) . "</{$key}>" . PHP_EOL;
+                if(is_numeric($val) || empty($val)) {
+                    $xml .= "<{$key}>{$val}</{$key}>" . PHP_EOL;
+                }else{
+                    $xml .= "<{$key}><![CDATA[{$val}]]></{$key}>" . PHP_EOL;
+                }
             }
         }
         $xml .= str_repeat("\t", $depth);
