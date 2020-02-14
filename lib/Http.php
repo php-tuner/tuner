@@ -502,7 +502,7 @@ class HttpResponse
     // 获取错误信息
     public function error()
     {
-        if (get_class($this->error) == 'Exception') {
+        if (is_object($this->error) && get_class($this->error) == 'Exception') {
             return $this->error->getMessage();
         }
         // maybe wrong
