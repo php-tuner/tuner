@@ -134,7 +134,7 @@ class MysqliDriver extends DbDriver
         $link->real_connect($host, $user, $password, $db_name);
         
         // set charset
-        $link->set_charset('utf8');
+        $link->set_charset($charset);
         
         return self::$links[$link_key] = $link;
     }
