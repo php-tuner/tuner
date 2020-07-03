@@ -245,21 +245,6 @@ class Model
             return '';
         }
         
-        // DEPRECTED(无用)
-        // $first_key = key($cond_array);
-        // $first_val = current($cond_array);
-        // $op        = is_string($first_val) ? strtoupper($first_val) : '';
-        // if (is_int($first_key) && in_array($op, array('OR', 'AND'))) {
-        //     $_conds = array();
-        //     foreach (array_slice($cond_array, 1) as $val) {
-        //         if (!$val) {
-        //             continue;
-        //         }
-        //         $_conds[] = $this->buildCondStr($val);
-        //     }
-        //     return count($_conds) > 1 ? '( ' . implode(" ) $op ( ", $_conds) . ' )' : implode($op, $_conds);
-        // }
-        
         $conds = array();
         foreach ($cond_array as $key => $value) {
             // Todo be more safe check
@@ -270,7 +255,10 @@ class Model
             if(preg_match('/\s/i', $key)){
                 throw new Exception('key is ilegal!');
             }
-            if(in_array($key, array('AND', 'OR'))){
+            
+            if(empty($key)){
+                $conds[] = $value;
+            }elseif(in_array($key, array('AND', 'OR'))){
                 $conds[] = '('.$this->buildCondStr($value, $key).')';
             } else if (is_array($value)) {
                 $in_value = array();

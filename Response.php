@@ -178,7 +178,7 @@ class Response
     {
         $charset || $charset = $this->charset;
         $this->addHeader("Content-Type: text/xml; charset={$charset}");
-        $this->_output(XML::encodeObj($data));
+        $this->_output(is_string($data) ? $data : XML::encodeObj($data));
     }
 
     //输出纯文本
@@ -210,7 +210,7 @@ class Response
         $this->_output($str);
     }
 
-    //输出文件
+    // 输出文件
     public function file($file_path, $charset = 'UTF-8')
     {
         $charset || $charset = $this->charset;
@@ -219,7 +219,7 @@ class Response
         $content_type        = "Content-type: $mime_type";
         $etag                = md5($content);
         $cache_valid         = isset($_SERVER['HTTP_IF_NONE_MATCH']) && $_SERVER['HTTP_IF_NONE_MATCH'] === $etag ? true : false;
-        //需要制定编码
+        // 需要制定编码
         if (in_array($mime_type, array(
             'text/plain',
             'text/html',

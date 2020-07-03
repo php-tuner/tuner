@@ -135,10 +135,13 @@ class Controller
     private function formatTplFile($template_file)
     {
         $template_file = trim($template_file);
+        
         if (empty($template_file)) {
             return '';
         }
+        
         $detect = new MobileDetect();
+        
         if ($detect->isMobile() || $this->req->get('_version') == 'mobile') {
             $pinfo    = pathinfo($template_file);
             $filename = $pinfo['filename'];
@@ -149,6 +152,7 @@ class Controller
                 $template_file = $tpl_file;
             }
         }
+        
         return $template_file;
     }
 
@@ -156,6 +160,7 @@ class Controller
     protected function render($template_file, $data = array())
     {
         $template_file = $this->formatTplFile($template_file);
+        
         return Tpl::render($template_file, array_merge(array(
             '_cfg_' => $this->cfg,
         ), $data), $this->res->charset);
@@ -165,12 +170,15 @@ class Controller
     protected function tpl($data = array(), $template_file = '')
     {
         $template_file = trim($template_file);
+        
         if (empty($template_file)) {
             $template_file = $this->template_file;
         }
+        
         $template_file = $this->formatTplFile($template_file);
         $output = $this->render($template_file, $data);
         $format = $this->req->format;
+        
         $this->res->output($output, $format);
     }
 
@@ -180,10 +188,12 @@ class Controller
     {
         $template_file = $this->formatTplFile($template_file);
         $output = $this->render($template_file, $data);
+        
         // 直接返回
         if ($return) {
             return $output;
         }
+        
         // 按json结构输出
         $format = $this->req->format;
         if (in_array($format, array('xml', 'json'))) {
@@ -191,6 +201,7 @@ class Controller
                 'html_content' => $output,
             );
         }
+        
         $this->res->output($output, $format);
     }
 
@@ -210,6 +221,7 @@ class Controller
     public function _handleException($e)
     {
         $format = $this->req->format;
+        
         $class_name = get_class($e);
         if (in_array($class_name, $this->safe_exception_class)) {
             $msg    = $e->getMessage();
@@ -219,6 +231,7 @@ class Controller
             $msg    = "系统错误($id)～";
             Log::error($id, $e->getMessage());
         }
+        
         // TODO SHOULD BETTER.
         $code   = $e->getCode() ? $e->getCode() : 1;
         switch ($format) {
@@ -243,6 +256,7 @@ class Controller
                 }
                 $data = $this->render('message/error.html', $data);
         }
+        
         // avoid call child method implemention
         self::output($data);
     }
