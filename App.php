@@ -115,16 +115,17 @@ class App
                 
                 // 添加自动加载目录
                 $autoload_dir = array();
+                $tmp_sub_dir = $sub_dir;
                 do {
-                    $autoload_dir['controller'][] = Helper::dir(APP_ROOT_DIR, 'controller', $sub_dir);
-                    $autoload_dir['model'][] = Helper::dir(APP_ROOT_DIR, 'model', $sub_dir);
-                    $autoload_dir['final'][] = Helper::dir(APP_ROOT_DIR, 'lib', $sub_dir);
-                    if (!$sub_dir) {
+                    $autoload_dir['controller'][] = Helper::dir(APP_ROOT_DIR, 'controller', $tmp_sub_dir);
+                    $autoload_dir['model'][] = Helper::dir(APP_ROOT_DIR, 'model', $tmp_sub_dir);
+                    $autoload_dir['final'][] = Helper::dir(APP_ROOT_DIR, 'lib', $tmp_sub_dir);
+                    if (!$tmp_sub_dir) {
                         break;
                     }
                     
-                    $index = strrpos($sub_dir, '/');
-                    $sub_dir = $index === false ? '' : substr($sub_dir, 0, $index);
+                    $index = strrpos($tmp_sub_dir, '/');
+                    $tmp_sub_dir = $index === false ? '' : substr($tmp_sub_dir, 0, $index);
                 } while (true);
                 spl_autoload_register(_createLoader_($autoload_dir), true, true);
                 
