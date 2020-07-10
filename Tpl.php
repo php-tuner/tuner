@@ -31,17 +31,37 @@ class Tpl
                 $tpl_file => $tpl_str,
             ));
         }
+        
         return self::twig($loader, $template_config, $charset)->render($tpl_file, $data);
     }
 
     // http://twig.sensiolabs.org/
     public static function twig($loader, $template_config, $charset = 'utf8')
     {
-        return new Twig_Environment($loader, array(
+        $filter = new Twig_SimpleFilter('rot13', 'str_rot13');
+        
+        // 'debug' => false,
+        // 'charset' => 'UTF-8',
+        // 'base_template_class' => 'Twig_Template',
+        // 'strict_variables' => false,
+        // 'autoescape' => 'html',
+        // 'cache' => false,
+        // 'auto_reload' => null,
+        // 'optimizations' => -1,
+        $twig_e = new Twig_Environment($loader, array(
             'cache'       => $template_config['cache'],
             'auto_reload' => true,
             'charset'     => $charset,
-            //'debug' => true,
+            // 'debug'       => true,
         ));
+        
+        if(! empty($template_config['filters'])) {
+            foreach($template_config['filters'] as $name => $filter)
+            {
+                $twig_e->addFilter($name, $filter);
+            }
+        }
+        
+        return $twig_e;
     }
 }
