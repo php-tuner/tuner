@@ -13,4 +13,10 @@ class CLIController extends Controller {
 			$res->notFound();// 404 for CGI
 		}
 	}
+    
+    public function _handleException($e)
+    {
+        // echo $e->getMessage().PHP_EOL;
+        fwrite(STDERR, date('Y-m-d H:i:s')."\terror:\t{$e->getMessage()}\n");
+    }
 }

@@ -50,20 +50,25 @@ class Xml
     {
         $xml = str_repeat("\t", $depth);
         $xml .= "<{$node}>" . PHP_EOL;
-        foreach ($data as $key => $val) {
-            if (is_array($val) || is_object($val)) {
-                $xml .= self::encode($val, $key, ($depth + 1));
-            } else {
-                $xml .= str_repeat("\t", ($depth + 1));
-                if(is_numeric($val) || empty($val)) {
-                    $xml .= "<{$key}>{$val}</{$key}>" . PHP_EOL;
-                }else{
-                    $xml .= "<{$key}><![CDATA[{$val}]]></{$key}>" . PHP_EOL;
+        
+        if(is_array($data)) {
+            foreach ($data as $key => $val) {
+                if (is_array($val) || is_object($val)) {
+                    $xml .= self::encode($val, $key, ($depth + 1));
+                } else {
+                    $xml .= str_repeat("\t", ($depth + 1));
+                    if(is_numeric($val) || empty($val)) {
+                        $xml .= "<{$key}>{$val}</{$key}>" . PHP_EOL;
+                    }else{
+                        $xml .= "<{$key}><![CDATA[{$val}]]></{$key}>" . PHP_EOL;
+                    }
                 }
-            }
+            }    
         }
+        
         $xml .= str_repeat("\t", $depth);
         $xml .= "</{$node}>" . PHP_EOL;
+        
         return $xml;
     }
 }
