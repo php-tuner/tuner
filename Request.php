@@ -53,7 +53,7 @@ class Request
             $this->base_url .= $_SERVER['REQUEST_URI'];
         }
         // 解析 json 格式的 POST 体
-        if (isset($this->header['Content-Type']) && preg_match('#^application/json;#i', $this->header['Content-Type'])) {
+        if (isset($this->header['Content-Type']) && preg_match('#^application/json#i', $this->header['Content-Type'])) {
             $_POST = json_decode(file_get_contents("php://input"), true);
         }
     }
