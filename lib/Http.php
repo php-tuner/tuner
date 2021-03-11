@@ -288,55 +288,65 @@ class Http
     public static function getCurlInstance($url, $connect_timeout = 2, $read_timeout = 3, $max_redirect = 2)
     {
         $ch = curl_init($url);
+        
         if (!is_resource($ch)) {
             return false;
         }
-        //bool
+        
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_HEADER, 1);
         //curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
-        //integer
         curl_setopt($ch, CURLOPT_CONNECTTIMEOUT_MS, $connect_timeout * 1000);
         curl_setopt($ch, CURLOPT_TIMEOUT_MS, ($read_timeout + $connect_timeout) * 1000);
         curl_setopt($ch, CURLOPT_NOSIGNAL, 1);
+        
         if ($max_redirect >= 0) {
             curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
             curl_setopt($ch, CURLOPT_AUTOREFERER, true);
             curl_setopt($ch, CURLOPT_MAXREDIRS, $max_redirect);
         }
+        
         return $ch;
     }
 
-    /*
-		* @purpose: 使用curl并行处理url
-		* @return: array 每个url获取的数据
-		* @param: $urls array url列表
-		* @param: $callback string 需要进行内容处理的回调函数。示例：func(array)
+    /**
+    * @purpose: 使用curl并行处理url
+    * @return: array 每个url获取的数据
+    * @param: $urls array url列表
+    * @param: $callback string 需要进行内容处理的回调函数。示例：func(array)
 	*/
     public static function multiCurl($request_list, $callback = '', $connect_timeout = 1, $read_timeout = 3, $max_redirect = 2)
     {
         $response = array();
+        
         if (empty($request_list)) {
             return array(new HttpResponse('', '', '', new Exception("无效请求(request_list empty)")));
         }
+        
         $chs = curl_multi_init();
-        //使用HTTP长连接(启用后用时反而会增长！)
+        
+        // 使用HTTP长连接(启用后用时反而会增长！)
         /*if (function_exists("curl_multi_setopt")) {
 			curl_multi_setopt($chs, CURLMOPT_PIPELINING, 1);
 		}*/
+            
         $curl_list = array();
         foreach ($request_list as $req) {
+            
             list($url, $params, $headers) = array_values($req);
             $ch                           = self::getCurlInstance($url, $connect_timeout, $read_timeout, $max_redirect);
+            
             //disable expect header, some server not surpport it
             $headers[] = 'Expect:';
             curl_setopt($ch, CURLOPT_HTTPHEADER, self::buildHeader($headers));
             curl_setopt($ch, CURLOPT_USERAGENT, self::$UA);
+            
             //curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
             //禁用 @ 前缀在 CURLOPT_POSTFIELDS 中发送文件(php >= 5.5.0)
             if (defined('CURLOPT_SAFE_UPLOAD')) {
                 curl_setopt($ch, CURLOPT_SAFE_UPLOAD, true);
             }
+            
             $force_urlencoded = true;
             //没有上传文件是强制 application/x-www-form-urlencoded 编码
             if (class_exists('CURLFile') && is_array($params)) {
@@ -347,15 +357,18 @@ class Http
                     }
                 }
             }
+            
             if ($force_urlencoded && !is_string($params) && $params) {
                 //如果有子段是@开头, php curl 会解析成需要上传文件，而且如果没有严格的用户输入过滤，可能会带来安全问题。
                 //所以我们转换成字符串，禁止用@方式上传文件。
                 $params = http_build_query((array) $params, '', '&');
             }
+            
             if ($params) {
                 curl_setopt($ch, CURLOPT_POST, true);
                 curl_setopt($ch, CURLOPT_POSTFIELDS, $params);
             }
+            
             curl_multi_add_handle($chs, $ch);
             $curl_list[] = $ch;
         }
@@ -365,7 +378,9 @@ class Http
             //Solve CPU 100% usage, a more simple and right way:
             curl_multi_select($chs); //default timeout 1.
         } while ($status === CURLM_CALL_MULTI_PERFORM || $active);
+        
         if ($callback && $status == CURLM_OK) {
+            
             while ($done = curl_multi_info_read($chs)) {
                 //http://php.net/curl_getinfo
                 $info  = curl_getinfo($done["handle"]);
@@ -396,6 +411,7 @@ class Http
                     // compact('info', 'error', 'result');
                     $rtn = new HttpResponse($http_status, $headers, $body, null, $info['url']);
                 }
+                
                 if (is_callable($callback)) {
                     $callback($rtn);
                 } else {
@@ -403,11 +419,13 @@ class Http
                 }
             }
         }
-        //remove and close all sub curl instanc
+        
+        // remove and close all sub curl instanc
         foreach ($curl_list as $ch) {
             curl_multi_remove_handle($chs, $ch);
             curl_close($ch);
         }
+        
         curl_multi_close($chs);
         return $response;
     }
@@ -418,6 +436,7 @@ class Http
         $info = array(
             'mine_type' => '',
         );
+        
         foreach (explode(';', $content_type) as $v) {
             switch (true) {
                 case stripos($v, '=') > 0:
@@ -432,6 +451,7 @@ class Http
                     $info[] = $v;
             }
         }
+        
         return $info;
     }
 }

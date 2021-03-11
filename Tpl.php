@@ -17,7 +17,7 @@ class Tpl
         $template_config = Config::tpl();
         // 加载模版引擎
         Twig_Autoloader::register();
-        if (preg_match('/\.(html|tpl|xml)*$/i', $tpl_file)) { //文件路径
+        if (preg_match('/\.(html|tpl|xml|js|css)*$/i', $tpl_file)) { //文件路径
             if (isset($template_config['path']) && !is_array($template_config['path']) && $template_config['path']) {
                 $template_config['path'] = array($template_config['path']);
             }

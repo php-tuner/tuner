@@ -240,20 +240,26 @@ class Controller
                 $data = array(
                     'error_msg'  => $msg,
                     'error_code' => $code,
+                    'tip_msg'    => $msg,
                 );
                 break;
             default: // html
+            
                 $data = array(
                     'error_msg'  => $msg,
                     'error_code' => $code,
                 );
+                
                 if (RUN_MODEL == 'CGI') {
                     $back_url = $this->req->gpc('_back_url');
+                    
                     if (!$back_url && isset($_SERVER['HTTP_REFERER'])) {
                         $back_url = $_SERVER['HTTP_REFERER'];
                     }
+                    
                     $data['back_url'] = $back_url;
                 }
+                
                 $data = $this->render('message/error.html', $data);
         }
         

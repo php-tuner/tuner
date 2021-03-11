@@ -11,10 +11,11 @@ class Model
 
     // 初始化
     public function __construct($table = '', $config_cate = 'default', $db_name = '')
-    {
+    {        
         if ($config_cate) {
             $this->db = Db::mysql(Config::mysql($config_cate), $db_name);
         }
+        
         // auto check table name from subclass name.
         if (empty($table) && empty($this->table)) {
             $obj_name = get_class($this);
@@ -32,7 +33,7 @@ class Model
     // 魔法__call
     public function __call($func, $args)
     {
-        if (!method_exists($this->db, $func)) {
+        if (! method_exists($this->db, $func)) {
             $class_name = get_class($this);
             throw new Exception("not found({$class_name}::{$func}).");
         }

@@ -67,7 +67,7 @@ class RequestCLI
     }
     
 
-    public static function gpc($key = null)
+    public function gpc($key = null)
     {
         if (empty($key)) {
             return $this->fake_get + $this->fake_post;

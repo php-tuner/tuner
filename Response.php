@@ -128,14 +128,29 @@ class Response
             case 'xml':
             case 'json':
             case 'text':
+            case 'js':
                 break;
             default:
                 $format = 'html';
         }
         $this->$format($data, $charset);
     }
+    
+    public function js($data, $charset = 'UTF-8')
+    {
+        $charset || $charset = $this->charset;
+        
+        if(!is_string($data)){
+            $data = json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+        }
+        
+        $this->addHeader("Content-Type: application/javascript; charset={$charset}");
+        $this->addHeader("Cache-Control: no-cache, must-revalidate");
+        $this->addHeader("Pragma: no-cache");
+        $this->_output($data);
+    }
 
-    //输出JSON
+    // 输出JSON
     public function json($data, $charset = 'UTF-8')
     {
         $charset || $charset = $this->charset;
@@ -148,7 +163,7 @@ class Response
         $this->_output($data);
     }
 
-    //输出jsonp
+    // 输出jsonp
     public function jsonp($data, $callback = '', $charset = 'UTF-8')
     {
         $charset || $charset   = $this->charset;
@@ -264,6 +279,7 @@ class Response
                 header($header, true);
             }
         }
+        
         if ($this->cache_info) {
             $etag = md5($str);
             Cache::setData($this->cache_info['key'], array(
@@ -273,7 +289,9 @@ class Response
             ), $this->cache_info['lifetime']);
             $this->setCacheHeader($this->cache_info['lifetime'], $etag);
         }
+        
         echo $str;
+        
         $halt && exit(0);
     }
 

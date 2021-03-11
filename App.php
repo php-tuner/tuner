@@ -155,7 +155,7 @@ class App
                     // 分隔符也许可以定制
                     // TODO 不要调用 $c 上的任何方法！！
                     if(method_exists($c, 'setTplFile')){
-                        $c->setTplFile(Helper::dir($sub_dir, $controller, $action).'.'.$ext);
+                        $c->setTplFile(Helper::dir($sub_dir, $controller, $action).'.'.(empty($ext) ? 'html' : $ext));
                     }
                     
                     $action = '_'.str_replace(CAMEL_CLASS_SEP, ' ', $action);
