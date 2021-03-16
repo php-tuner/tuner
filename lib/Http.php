@@ -333,22 +333,27 @@ class Http
         $curl_list = array();
         foreach ($request_list as $req) {
             
-            list($url, $params, $headers) = array_values($req);
-            $ch                           = self::getCurlInstance($url, $connect_timeout, $read_timeout, $max_redirect);
+            // list($url, $params, $headers) = array_values($req);
+            $req_arr = array_values($req);
+            $url = empty($req_arr[0]) ? '' : $req_arr[0];
+            $params = empty($req_arr[1]) ? array() : $req_arr[1];
+            $headers = empty($req_arr[2]) ? array() : $req_arr[2];
             
-            //disable expect header, some server not surpport it
+            $ch = self::getCurlInstance($url, $connect_timeout, $read_timeout, $max_redirect);
+            
+            // disable expect header, some server not surpport it
             $headers[] = 'Expect:';
             curl_setopt($ch, CURLOPT_HTTPHEADER, self::buildHeader($headers));
             curl_setopt($ch, CURLOPT_USERAGENT, self::$UA);
             
-            //curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-            //禁用 @ 前缀在 CURLOPT_POSTFIELDS 中发送文件(php >= 5.5.0)
+            // curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+            // 禁用 @ 前缀在 CURLOPT_POSTFIELDS 中发送文件(php >= 5.5.0)
             if (defined('CURLOPT_SAFE_UPLOAD')) {
                 curl_setopt($ch, CURLOPT_SAFE_UPLOAD, true);
             }
             
             $force_urlencoded = true;
-            //没有上传文件是强制 application/x-www-form-urlencoded 编码
+            // 没有上传文件是强制 application/x-www-form-urlencoded 编码
             if (class_exists('CURLFile') && is_array($params)) {
                 foreach ($params as $_v) {
                     if ($_v instanceof CURLFile) {
@@ -359,8 +364,8 @@ class Http
             }
             
             if ($force_urlencoded && !is_string($params) && $params) {
-                //如果有子段是@开头, php curl 会解析成需要上传文件，而且如果没有严格的用户输入过滤，可能会带来安全问题。
-                //所以我们转换成字符串，禁止用@方式上传文件。
+                // 如果有子段是@开头, php curl 会解析成需要上传文件，而且如果没有严格的用户输入过滤，可能会带来安全问题。
+                // 所以我们转换成字符串，禁止用@方式上传文件。
                 $params = http_build_query((array) $params, '', '&');
             }
             
@@ -371,22 +376,24 @@ class Http
             
             curl_multi_add_handle($chs, $ch);
             $curl_list[] = $ch;
+            $response[] = array(); // 初始化空，保证后边排序正确
         }
-        //$callback = trim($callback);
+        // $callback = trim($callback);
         do {
             $status = curl_multi_exec($chs, $active);
-            //Solve CPU 100% usage, a more simple and right way:
+            // Solve CPU 100% usage, a more simple and right way:
             curl_multi_select($chs); //default timeout 1.
         } while ($status === CURLM_CALL_MULTI_PERFORM || $active);
         
         if ($callback && $status == CURLM_OK) {
             
             while ($done = curl_multi_info_read($chs)) {
-                //http://php.net/curl_getinfo
+                // http://php.net/curl_getinfo
+                $handle = $done["handle"];
                 $info  = curl_getinfo($done["handle"]);
                 
                 $error = curl_error($done["handle"]);
-                //wrong may be still have body data
+                // wrong may be still have body data
                 $result = curl_multi_getcontent($done["handle"]);
                 
                 $http_status  = array();
@@ -401,11 +408,15 @@ class Http
                     $http_status['version'] = empty($http_info[0]) ? '' : $http_info[0];
                     $http_status['code']    = empty($http_info[1]) ? '' : $http_info[1];
                     $http_status['desc']    = empty($http_info[2]) ? '' : $http_info[2];
-                    
                 }
                 
                 if ($error || !in_array($info['http_code'], array(200))) {
-                    $rtn = new HttpResponse($http_status, $headers, $body, new Exception("url:{$info['url']}, error:$error, info:" . print_r($info, true)));
+                    $rtn = new HttpResponse(
+                        $http_status,
+                        $headers,
+                        $body, 
+                        new Exception("url:{$info['url']}, error:$error, info:" . print_r($info, true))
+                    );
                     // throw new Exception($error);
                 } else {
                     // compact('info', 'error', 'result');
@@ -414,8 +425,11 @@ class Http
                 
                 if (is_callable($callback)) {
                     $callback($rtn);
-                } else {
-                    $response[] = $rtn;
+                } else {                    
+                    
+                    // 返回值保持 request_list 的顺序
+                    $index = array_search($handle, $curl_list);
+                    $response[$index] = $rtn;
                 }
             }
         }
