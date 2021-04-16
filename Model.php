@@ -460,7 +460,7 @@ class Model
         $where_str = $this->getWhereStr($cond_array);
         $order_str = $this->buildOrderStr($order_array);
         $count_sql = "SELECT count(*) FROM `{$this->table}` $where_str ";
-        $fields = implode(',', $fields);
+        $fields = is_array($fields) ? implode(',', $fields) : $fields;
         $sql = "SELECT $fields FROM `{$this->table}` $where_str $order_str LIMIT $offset, $page_size ";
         $count = intval($this->queryFirst($count_sql));
         $result = array(
