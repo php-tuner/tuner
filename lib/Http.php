@@ -129,6 +129,7 @@ class Http
             $curl_cmd = "curl -s '$url' $params > /dev/null 2>&1 &";
             return exec($curl_cmd);
         }
+        
         return self::socketRequest($url, $params, false);
     }
 
@@ -142,16 +143,20 @@ class Http
     {
         $crlf   = "\r\n";
         $method = 'GET';
+        
         if ($params) {
             $method = 'POST';
         }
+        
         $parts = parse_url($url);
         if (!isset($parts['path'])) {
             $parts['path'] = '/';
         }
+        
         if (!isset($headers['User-Agent'])) {
             $headers['User-Agent'] = self::$UA;
         }
+        
         $out   = array();
         $out[] = "$method {$parts['path']}?{$parts['query']} HTTP/1.1";
         $out[] = "Host: {$parts['host']}";
@@ -160,6 +165,7 @@ class Http
         if (function_exists('gzinflate')) {
             $headers["Accept-Encoding"] = "gzip,deflate";
         }
+        
         $post_string = '';
         if ($method == 'POST') {
             if (is_array($params)) {
@@ -171,24 +177,29 @@ class Http
             //must have it
             $headers['Content-Length'] = strlen($post_string);
         }
+        
         if ($headers) {
             $out = array_merge($out, self::buildHeader($headers));
         }
+        
         //header end
         $out[] = '';
         $out[] = $post_string;
         if (!isset($parts['port'])) {
             $parts['port'] = $parts['scheme'] == 'https' ? 443 : 80;
         }
+        
         if ($parts['scheme'] == 'https') {
             $hostname = "ssl://{$parts['host']}";
         } else {
             $hostname = $parts['host'];
         }
+        
         $fp = fsockopen($hostname, $parts['port'], $errno, $errstr, $connect_timeout);
         if (!$fp) {
             return new HttpResponse('', '', '', new Exception("url: $url, error: $errstr", $errno));
         }
+        
         $string  = implode($crlf, $out);
         $str_len = strlen($string);
         for ($written = 0, $fwrite = 0; $written < $str_len; $written += $fwrite) {
@@ -197,16 +208,20 @@ class Http
                 break;
             }
         }
+        
         if ($fwrite != $str_len) {
             fclose($fp);
             return new HttpResponse('', '', '', new Exception("url: $url, error: $fwrite, $str_len "));
         }
+        
         //fwrite($fp, implode($crlf, $out));
         //repsonse header
         $headers     = array();
         $body        = '';
         $http_status = array();
+        
         if ($wait_result) {
+            
             stream_set_timeout($fp, $read_timeout);
             //read and parse header
             list($http_status['version'], $http_status['code'], $http_status['desc']) = explode(' ', trim(fgets($fp, 256)));
@@ -220,17 +235,23 @@ class Http
                 //list($key, $val) = explode(':', $line, 2);
                 //$headers[$key] = trim($val);
             }
+            
             $headers = self::parseHeaders($header_lines);
+            
             //read body
             //分块传输编码只在HTTP协议1.1版本（HTTP/1.1）中提供
             if (isset($headers['Transfer-Encoding']) && $headers['Transfer-Encoding'] == 'chunked') {
                 while (!feof($fp)) {
                     $line = fgets($fp, 1024);
+                    
                     if ($line && preg_match('/^([0-9a-f]+)/i', $line, $matches)) {
+                        
                         $len = hexdec($matches[1]);
+                        
                         if ($len == 0) {
                             break; //maybe have some other header
                         }
+                        
                         while ($len > 0) {
                             $tmp_data = fread($fp, $len);
                             $body .= $tmp_data;
@@ -249,19 +270,23 @@ class Http
                     $body .= fread($fp, 1024 * 8);
                 }
             }
+            
             if ($body && isset($headers['Content-Encoding']) && $headers['Content-Encoding'] == 'gzip') {
                 $body = gzinflate(substr($body, 10));
             }
         }
+        
         $info = stream_get_meta_data($fp);
         fclose($fp);
         if ($info['timed_out']) {
             return new HttpResponse($http_status, $headers, $body, new Exception("Connection timed out!"));
         }
+        
         // 重定向处理
         if (substr($http_status['code'], 0, 1) == 3 && $max_redirect > 0 && isset($headers['Location']) && filter_var($headers['Location'], FILTER_VALIDATE_URL)) {
             return self::socketRequest($headers['Location'], $params = array(), $headers = array(), $wait_result, $connect_timeout, $read_timeout, --$max_redirect);
         }
+        
         //$uri = $info['uri'];
         //$result = array('http_status' => $http_status, 'header' => $headers, 'body' => $body);
         return new HttpResponse($http_status, $headers, $body);
@@ -519,6 +544,17 @@ class HttpResponse
         }
         
         return $val;
+    }
+    
+    public function result()
+    {
+        $content_type = strtolower($this->getHeader('Content-Type'));
+        
+        if(preg_match('/^application\/json;/i', $content_type)) {
+            return $this->json();
+        }
+        
+        return $this->raw();
     }
 
     // get status
