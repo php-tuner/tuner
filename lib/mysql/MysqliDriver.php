@@ -103,6 +103,7 @@ class MysqliDriver extends DbDriver
         if (!isset($this->config[$type])) {
             throw new Exception("not found $type config");
         }
+        
         $cfg      = $this->config[$type];
         $host     = isset($cfg['host']) ? $cfg['host'] : null;
         $user     = isset($cfg['user']) ? $cfg['user'] : '';
@@ -112,9 +113,11 @@ class MysqliDriver extends DbDriver
         $charset  = isset($cfg['charset']) ? $cfg['charset'] : 'utf8';
         $dsn      = "mysql:dbname={$db_name};host={$host};port={$port};charset={$charset}";
         $link_key = md5(json_encode($cfg) . $db_name);
+        
         if (isset(self::$links[$link_key]) && !$force_new) {
             return self::$links[$link_key];
         }
+        
         self::$links[$link_key] = null; // destory it
         
         /* activate reporting by exception. */
@@ -157,8 +160,17 @@ class MysqliDriver extends DbDriver
     // 抛出异常
     private function panic($msg, $code = 0)
     {
-        $this->log($msg);
-        throw new Exception("数据库错误", $code);
+        $this->log($msg, "code: $code,");
+        
+        switch($code) {
+            case 1406:
+                $tip = '字段过长';
+                break;
+            default:
+                $tip = "数据库错误";
+        }
+        
+        throw new Exception($tip, $code);
     }
 
     // 记录错误日志
@@ -181,6 +193,7 @@ class MysqliDriver extends DbDriver
     {
         try{
             $sql = trim($sql);
+            
             if ($this->transaction_link) {
                 $link = $this->transaction_link;
             } else {
@@ -192,18 +205,22 @@ class MysqliDriver extends DbDriver
                 }
                 $link = $this->getRawLink($link_type, $force_new);
             }
+            
             $this->last_link = $link;
             $start_time = microtime(true);
             $result = $link->query($sql);
             $this->last_query_sql = $sql;
+            
             if ($result == false) {
                 throw new Exception("query failed: $sql");
             }
+            
             $used_time  = microtime(true) - $start_time;
             Log::debug("sql: $sql, time: $used_time sec");
         }catch(Exception $e){
             // should reconnect.
             $code = $e->getCode();
+            
             if (in_array($code, array(
                 '2006', // MySQL server has gone away
                 '2013', // Lost connection to MySQL server during query
@@ -212,7 +229,8 @@ class MysqliDriver extends DbDriver
                 $link->ping();
                 $result = $link->query($sql);
             }
-            $this->panic($e->getMessage()." sql: $sql");
+            
+            $this->panic($e->getMessage()." sql: $sql", $code);
         }
         return $result;
     }
