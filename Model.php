@@ -241,7 +241,7 @@ class Model
     //         'title' => array('like' => '%hello%'),
     // );
     private function buildCondStr($cond_array, $concate_str = 'AND')
-    {
+    {        
         if (!is_array($cond_array) || !$cond_array) {
             return '';
         }
@@ -262,6 +262,12 @@ class Model
             }elseif(in_array($key, array('AND', 'OR'))){
                 $conds[] = '('.$this->buildCondStr($value, $key).')';
             } else if (is_array($value)) {
+                
+                if(empty($value)) { // 防止查询所有数据！！！
+                    $conds[] = " $key in( '' ) ";
+                    continue;
+                }
+                
                 $in_value = array();
                 foreach ($value as $k => $v) {
                     if (is_int($k)) {
@@ -282,6 +288,7 @@ class Model
                         }
                     }
                 }
+                
                 if ($in_value) {
                     $in_value = implode("','", $in_value);
                     $conds[]  = " $key in( '$in_value' ) ";
