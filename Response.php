@@ -221,8 +221,10 @@ class Response
     public function notFound()
     {
         $str = $_SERVER["SERVER_PROTOCOL"] . " 404 Not Found";
-        $this->addHeader($str);
-        $this->_output($str);
+        header($str);
+        // $this->addHeader($str);
+        // $this->_output($str);
+        exit();
     }
 
     // 输出文件
