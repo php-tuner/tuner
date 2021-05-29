@@ -11,7 +11,53 @@ class Session
     {
         if (!isset($_SESSION)) {
             session_start();
+            
+            if (isset($_SESSION['expire_time'])) {
+               
+               if ($_SESSION['expire_time'] < time()) {
+                   // Should not happen usually. This could be attack or due to unstable network.
+                   // Remove all authentication status of this users session.
+                   throw new Exception('回话已失效');
+               }
+               
+               if (isset($_SESSION['new_session_id'])) {
+                   // Not fully expired yet. Could be lost cookie by unstable network.
+                   // Try again to set proper session ID cookie.
+                   // NOTE: Do not try to set session ID again if you would like to remove
+                   // authentication flag.
+                   session_commit();
+                   session_id($_SESSION['new_session_id']);
+                   // New session ID should exist
+                   session_start();
+                   return;
+               }
+           }
         }
+    }
+    
+    public static function regenerate($expire_in = 60)
+    {
+        // New session ID is required to set proper session ID
+        // when session ID is not set due to unstable network.
+        $new_session_id = session_create_id();
+        
+        $_SESSION['new_session_id'] = $new_session_id;
+    
+        // Set destroy timestamp
+        $_SESSION['expire_time'] = time() + $expire_in;
+    
+        // Write and close current session;
+        session_commit();
+
+        // Start session with new session ID
+        session_id($new_session_id);
+        ini_set('session.use_strict_mode', 0);
+        session_start();
+        ini_set('session.use_strict_mode', 1);
+    
+        // New session does not need them
+        unset($_SESSION['destroyed']);
+        unset($_SESSION['new_session_id']);
     }
 
     // 更新 session
