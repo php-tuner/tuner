@@ -71,7 +71,7 @@ class Helper
     // $operation：DECODE表示解密,其它表示加密
     // $key： 密匙
     // $expiry：密文有效期
-    public function authcode($string, $operation = 'DECODE', $key, $expiry = 0)
+    public function authcode($string, $operation = 'DECODE', $key = '', $expiry = 0)
     {
         // 动态密匙长度，相同的明文会生成不同密文就是依靠动态密匙
         $ckey_length = 4;
