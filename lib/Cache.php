@@ -14,16 +14,34 @@ class Cache
     // 获取默认的缓存
     public static function getDefault()
     {
-        $cache_handler = ucwords(strtolower(Config::common('cache')));
-        $servers       = Config::memcache('servers');
-        switch (true) {
-            case ($cache_handler == 'Auto' && class_exists('Memcached')) || $cache_handler == 'Memcached':
-                return self::memcached($servers['cache']);
-            break;
-            case ($cache_handler == 'Auto' && class_exists('Memcache')) || $cache_handler == 'Memcache':
-                return self::memcache($servers['cache']);
-            break;
+        $cache_handler = Config::common('cache');
+        $cache_cfg = Config::cache();
+        
+        if(!empty($cache_cfg)) {
+            $cache_handler = key($cache_cfg);
+            $servers = $cache_cfg[$cache_handler];
         }
+        
+        $cache_handler = ucwords(strtolower($cache_handler));
+        
+        switch (true) {
+            case ($cache_handler == 'Auto' && class_exists('Redis')) || $cache_handler == 'Redis':
+                if(empty($servers)) {
+                    $servers = Config::redis('servers')['cache'];
+                }
+                return self::redis($servers);
+            case ($cache_handler == 'Auto' && class_exists('Memcached')) || $cache_handler == 'Memcached':
+                if(empty($servers)) {
+                    $servers = Config::memcache('servers')['cache'];
+                }
+                return self::memcached($servers);
+            case ($cache_handler == 'Auto' && class_exists('Memcache')) || $cache_handler == 'Memcache':
+                if(empty($servers)) {
+                    $servers = Config::memcache('servers')['cache'];
+                }
+                return self::memcache($servers['cache']);
+        }
+        
         throw new Exception("没有找到默认的cache");
     }
 
@@ -66,7 +84,7 @@ class Cache
         $meta_key  = self::getMetaKey($key);
         $meta_data = self::get($meta_key);
         $now_time  = time();
-        //需要加锁
+        // 需要加锁
         if (is_array($meta_data) && $meta_data['real_expire_time'] < $now_time && $meta_data['status'] == 'cache') {
             $meta_data['status'] = 'fresh';
             self::set($meta_key, $meta_data); //shold be never expire
@@ -111,12 +129,15 @@ class Cache
     public static function memcached($servers = array())
     {
         static $mcd_list = array();
+        
         if (!$servers) {
             throw new Exception("未配置memcache服务器列表");
         }
+        
         if (!class_exists('Memcached')) {
             throw new Exception("Memcached not found");
         }
+        
         $key = md5(serialize($servers));
         if (!isset($mcd_list[$key])) {
             $mcd = new Memcached();
@@ -124,6 +145,7 @@ class Cache
             isset($config['options']) && $mcd->setOptions($config['options']);
             $mcd_list[$key] = $mcd;
         }
+        
         return $mcd_list[$key];
     }
 
@@ -131,13 +153,17 @@ class Cache
     public static function memcache($servers = array())
     {
         static $mc_list = array();
+        
         if (!$servers) {
             throw new Exception("未配置memcache服务器列表");
         }
+        
         if (!class_exists('Memcache')) {
             throw new Exception("Memcache not found");
         }
+        
         $key = md5(serialize($servers));
+        
         if (!isset($mc_list[$key])) {
             $mc = new Memcache();
             foreach ($servers as $server) {
@@ -145,6 +171,32 @@ class Cache
             }
             $mc_list[$key] = $mc;
         }
+        
+        return $mc_list[$key];
+    }
+    
+    // redis
+    public static function redis($servers = array())
+    {
+        static $mc_list = array();
+        
+        if (!$servers) {
+            throw new Exception("未配置redis服务器列表");
+        }
+        
+        if (!class_exists('Redis')) {
+            throw new Exception("Redis not found");
+        }
+        
+        $key = md5(serialize($servers));
+        
+        if (!isset($mc_list[$key])) {
+            $redis = new Redis();
+            $idx = array_rand($servers);
+            call_user_func_array(array($redis, 'pconnect'), $servers[$idx]);
+            $mc_list[$key] = $redis;
+        }
+        
         return $mc_list[$key];
     }
 }

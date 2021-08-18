@@ -310,7 +310,7 @@ class Model
         $set_array = array();
         foreach ($data_array as $key => $value) {
             if (is_scalar($value) == false) {
-                throw new Exception("{$key} is not scalar.");
+                // throw new Exception("{$key} is not scalar.");
             }
             $value       = $this->escape($value);
             $key         = $this->escape($key);
