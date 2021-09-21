@@ -69,13 +69,15 @@ class Log
             $base_dir = Config::site('log_dir');
             if (!$base_dir) {
                 $tmp_dir = rtrim(sys_get_temp_dir(), DIRECTORY_SEPARATOR);
-                $base_dir = $tmp_dir.DIRECTORY_SEPARATOR.'tuner_'.strtolower(RUN_MODEL);
+                $base_dir = $tmp_dir;
                 // return trigger_error('须设置日志记录目录～');
             }
-            $dir = Helper::dir($base_dir, $dir);
+            $dir = Helper::dir($base_dir, 'tuner_'.strtolower(RUN_MODEL), $dir);
         }
+        
         // 检查目录是否存在，若不存在则创建之
         is_dir($dir) || mkdir($dir, 0755, true);
+        
         // 滚动方式
         switch ($rotate_type) {
             case 'month':
@@ -90,14 +92,17 @@ class Log
                 $filename = date("Ymd");
                 break;
         }
+        
         $filename .= ".txt";
         $filepath = Helper::dir($dir, $filename);
         if(file_exists($filepath) && !is_writeable($filepath)){
             throw new Exception("Log failed: not writeable.");
         }
+        
         $str      = trim(self::getVarString($str));
         $str = date("Y-m-d H:i:s\t") . $str . PHP_EOL;
         file_put_contents($filepath, $str, FILE_APPEND);
+        
         return $str;
     }
 }
