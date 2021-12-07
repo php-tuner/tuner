@@ -30,6 +30,11 @@ class Model
         }
     }
 
+    public function getTable()
+    {
+        return $this->table;
+    }
+
     // 魔法__call
     public function __call($func, $args)
     {
