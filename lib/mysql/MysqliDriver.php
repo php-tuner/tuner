@@ -42,69 +42,27 @@ class MysqliDriver extends DbDriver
             }
             self::$links[$type] = null;
         }
-        
         foreach (self::$links as $link) {
             if (is_object($link)) {
                 $link->close();
             }
             $link = null;
         }
-        
         self::$links = array();
     }
 
-    private function getLinkId($link)
-    {
-        if(function_exists('get_resource_id') && is_resource($link)) {
-            return get_resource_id($link);
-        }
-        
-        return $link->thread_id;
-    }
-    
-    private function &getLinkInfo($link)
-    {
-        static $link_info_arr = array();
-        $link_id = $this->getLinkId($link);
-        
-        if(empty($link_info_arr[$link_id])) {
-            $link_info_arr[$link_id] = array(
-                'trans_count' => 0
-            );
-        }
-        
-        return $link_info_arr[$link_id];
-    }
-
     // 开启事务
-    public function begin($flags = 0, $name = '')
+    public function begin($flags = 0, $name = 'transation')
     {
         $this->transaction_link = $this->getRawLink('master');
-        
         // close autocommit.
         if(!$this->transaction_link->autocommit(false)){
             $this->panic("close autocommit failed.");
         }
-        
-        if(empty($name)) {
-            $name = uniqid('transation');
+        if (!$this->transaction_link->begin_transaction($flags, $name)) {
+            $this->panic("beginTransaction failed.");
         }
         
-        $link_info = &$this->getLinkInfo($this->transaction_link);
-                
-        if(empty($link_info['trans_count'])) {
-            
-            if (!$this->transaction_link->begin_transaction($flags, $name)) {
-                $this->panic("beginTransaction failed.");
-            }
-            
-            $link_info['trans_count'] = 1;
-            
-        }else{
-            $link_info['trans_count']++;
-        }
-        
-        return;
     }
 
     // 提交事务
@@ -113,36 +71,20 @@ class MysqliDriver extends DbDriver
         if (!is_object($this->transaction_link)) {
             throw new Exception('you may forgot to call begin.');
         }
-        
-        $link_info = &$this->getLinkInfo($this->transaction_link);
-        
-        if(!empty($link_info['trans_count']) && $link_info['trans_count'] > 0) {
-            $link_info['trans_count']--;
-        }else{
-            $this->transaction_link->commit();
-            $this->transaction_link->autocommit(true);        
-            $this->transaction_link = null;
-        }
+        $this->transaction_link->commit();
+        $this->transaction_link->autocommit(true);
+        $this->transaction_link = null;
     }
 
     // 回滚事务
     public function rollback()
     {
-        // if (!is_object($this->transaction_link)) {
-        //     throw new Exception('you may forgot to call begin.');
-        // }
-        
-        $link_info = &$this->getLinkInfo($this->transaction_link);
-        
-        if(!empty($link_info['trans_count']) && $link_info['trans_count'] > 0) {
-            $link_info['trans_count']--;
-        }else{
-            $this->transaction_link->rollback();
-            $this->transaction_link->autocommit(true);
-            $this->transaction_link = null;
+        if (!is_object($this->transaction_link)) {
+            throw new Exception('you may forgot to call begin.');
         }
-
-        // $this->transaction_link->rollback();
+        $this->transaction_link->rollback();
+        $this->transaction_link->autocommit(true);
+        $this->transaction_link = null;
     }
 
     // 转义字符
