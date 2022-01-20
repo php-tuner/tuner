@@ -119,6 +119,7 @@ class MysqliDriver extends DbDriver
         if(!empty($link_info['trans_count']) && $link_info['trans_count'] > 1) {
             $link_info['trans_count']--;
         }else{
+            $link_info['trans_count'] = 0;
             $this->transaction_link->commit();
             $this->transaction_link->autocommit(true);        
             $this->transaction_link = null;
