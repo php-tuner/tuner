@@ -135,7 +135,7 @@ class MysqliDriver extends DbDriver
         
         $link_info = &$this->getLinkInfo($this->transaction_link);
         
-        if(!empty($link_info['trans_count']) && $link_info['trans_count'] > 0) {
+        if(!empty($link_info['trans_count']) && $link_info['trans_count'] > 1) {
             $link_info['trans_count']--;
         }else{
             $this->transaction_link->rollback();
